@@ -3,6 +3,8 @@ import time
 from typing import List
 
 import requests
+
+from autoposting.core import get_contact
 from cfg import hv
 
 
@@ -23,7 +25,9 @@ async def start_autoposting():
         response = connect_wall(group_id)
         response.reverse()
         for line in response:
-            print(line)
-        print('-------------')
-        await asyncio.sleep(2)
+            text = line.get('text')
+            print(text)
+            get_contact(text=text)
+            print('---------------------------------')
+            await asyncio.sleep(3)
 
