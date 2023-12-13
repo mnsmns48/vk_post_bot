@@ -8,14 +8,14 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, asyn
 
 @dataclass
 class Hidden:
-    tg_bot_admin_id: list[int]
-    tg_chat_id: int
-    bot_token: str
-    vk_api_token: str
-    vk_token: str
-    vk_wall_id: list
-    posts_quantity: int
-    notification: bool
+    # tg_bot_admin_id: list[int]
+    # tg_chat_id: int
+    # bot_token: str
+    # vk_api_token: str
+    # vk_token: str
+    # vk_wall_id: list
+    # posts_quantity: int
+    # notification: bool
     db_username: str
     db_password: str
     db_local_port: int
@@ -27,14 +27,14 @@ def load_hidden_vars(path: str):
     env.read_env()
 
     return Hidden(
-        tg_bot_admin_id=list(map(int, env.list("TELEGRAM_BOT_ADMIN_ID"))),
-        tg_chat_id=env.int("TELEGRAM_CHAT_ID"),
-        bot_token=env.str("BOT_TOKEN"),
-        vk_api_token=env.str("VK_API_TOKEN"),
-        vk_token=env.str("VK_TOKEN"),
-        vk_wall_id=list(map(int, env.list("VK_WALL_ID"))),
-        posts_quantity=env.int("POSTS_QUANTITY"),
-        notification=env.bool("DISABLE_NOTIFICATION"),
+        # tg_bot_admin_id=list(map(int, env.list("TELEGRAM_BOT_ADMIN_ID"))),
+        # tg_chat_id=env.int("TELEGRAM_CHAT_ID"),
+        # bot_token=env.str("BOT_TOKEN"),
+        # vk_api_token=env.str("VK_API_TOKEN"),
+        # vk_token=env.str("VK_TOKEN"),
+        # vk_wall_id=list(map(int, env.list("VK_WALL_ID"))),
+        # posts_quantity=env.int("POSTS_QUANTITY"),
+        # notification=env.bool("DISABLE_NOTIFICATION"),
         db_username=env.str("DB_USERNAME"),
         db_password=env.str("DB_PASSWORD"),
         db_local_port=env.int("DB_LOCAL_PORT"),
