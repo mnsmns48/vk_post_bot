@@ -11,7 +11,9 @@ def get_name_by_id(_id: int | None, method: str) -> str:
         return 'Анонимно'
     else:
         params_depends = {
-            'groups.getById': ('group_id', lambda x: x.json()['response']['groups'][0].get('name')),
+            'groups.getById': (
+                'group_id',
+                lambda x: x.json()['response']['groups'][0].get('name')),
             'users.get': (
                 'user_ids',
                 lambda x: f"{x.json()['response'][0].get('first_name')} {x.json()['response'][0].get('last_name')}")
@@ -29,14 +31,17 @@ def get_name_by_id(_id: int | None, method: str) -> str:
         return output
 
 
-def get_contact(text: str) -> List | None:
-    response = re.findall(r'(\+7|8).*?(\d{3}).*?(\d{3}).*?(\d{2}).*?(\d{2})', text)
+def get_contact(text: str) -> str | None:
+    edit_text = text.replace('-', '').replace(')', '').replace('(', '')
+    print(edit_text)
+    match = re.findall(r'\b\+?[7,8](\s*\d{3}\s*\d{3}\s*\d{2}\s*\d{2})\b', edit_text)
     try:
-        if response[0] == '8':
-            response[0] = '+7'
+        if match[0]:
+            response = match[0].replace(' ', '')
+            if len(response) == 10:
+                return f"7{response}"
     except IndexError:
-        pass
-    print(response)
+        return None
 
 
 class Post:
