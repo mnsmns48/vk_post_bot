@@ -1,19 +1,18 @@
 import asyncio
 
 from autoposting.core import get_name_by_id
+from autoposting.crud import check_phone_number
 from autoposting.db_models import db_
 from autoposting.start import start_autoposting
 
 
-# async def main():
-#     await start_autoposting()
+def main():
+    start_autoposting()
+
 
 
 if __name__ == "__main__":
     try:
-        db_.drop_table()
-        db_.create_table()
-        # asyncio.run(main())
+        main()
     except KeyboardInterrupt:
         pass
-        # main().close()

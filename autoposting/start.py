@@ -1,12 +1,9 @@
-import asyncio
 import time
 from typing import List
-
 import requests
+from autoposting.core import Post
 
-from autoposting.core import get_contact
-from autoposting.db_models import Posts
-from cfg import hv, AsyncScopedSessionPG, async_engine_pg
+from cfg import hv, engine
 
 
 def connect_wall(group_id: int) -> List:
@@ -21,16 +18,23 @@ def connect_wall(group_id: int) -> List:
     return r.json()['response']['items']
 
 
-async def start_autoposting():
-    # for group_id in hv.vk_wall_id:
-    #     response = connect_wall(group_id)
-    #     response.reverse()
-    #     for line in response:
+def start_autoposting():
+    for group_id in hv.vk_wall_id:
+        response = connect_wall(group_id)
+        # response.reverse()
+        for line in response:
+            # print(line)
+            # time.sleep(15)
+            posta = Post(line)
+            posta.display()
+            time.sleep(15)
+
+
     #         text = line.get('text')
     #         print(get_contact(text=text))
     #         print('---------------------------------')
     #         await asyncio.sleep(1)
-    async with async_engine_pg.begin() as conn:
-        await conn.run_sync(Posts.metadata.create_all)
+    # async with engine.begin() as conn:
+    #     await conn.run_sync(Posts.metadata.create_all)
 
 

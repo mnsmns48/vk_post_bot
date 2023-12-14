@@ -3,7 +3,7 @@ import datetime
 from sqlalchemy import DateTime, func, BigInteger
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
 
-from cfg import async_engine_pg, sync_engine
+from cfg import engine
 
 
 class Base(DeclarativeBase):
@@ -31,10 +31,10 @@ class Posts(Base):
     attachments: Mapped[str | None]
 
     def create_table(self):
-        self.metadata.create_all(bind=sync_engine)
+        self.metadata.create_all(bind=engine)
 
     def drop_table(self):
-        self.metadata.drop_all(bind=sync_engine)
+        self.metadata.drop_all(bind=engine)
 
 
 db_ = Posts()
