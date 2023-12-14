@@ -1,7 +1,7 @@
 import time
 from typing import List
 import requests
-from autoposting.core import Post
+from autoposting.core import Post, get_attachments
 
 from cfg import hv, engine
 
@@ -13,7 +13,7 @@ def connect_wall(group_id: int) -> List:
                          'v': 5.199,
                          'owner_id': group_id,
                          'count': hv.posts_quantity,
-                         'offset': 0
+                         'offset': 2
                      })
     return r.json()['response']['items']
 
@@ -23,11 +23,8 @@ def start_autoposting():
         response = connect_wall(group_id)
         # response.reverse()
         for line in response:
-            # print(line)
-            # time.sleep(15)
-            posta = Post(line)
-            posta.display()
-            time.sleep(15)
+            get_attachments(line)
+            time.sleep(1)
 
 
     #         text = line.get('text')

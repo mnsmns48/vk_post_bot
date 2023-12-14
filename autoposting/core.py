@@ -7,36 +7,34 @@ from autoposting.crud import check_phone_number
 from cfg import hv
 
 
-def get_name_by_id(_id: int, method: str) -> str:
-    params_depends = {
-        'groups.getById': [
-            'group_id',
-            lambda x: x.json()['response']['groups'][0].get('name')
-        ],
-        'users.get': [
-            'user_ids',
-            lambda x: f"{x.json()['response'][0].get('first_name')} {x.json()['response'][0].get('last_name')}"
-        ]
-    }
+def get_name_by_id(_id: int) -> str:
+    if _id is None:
+        return 'Анонимно'
     params = {
         'access_token': hv.vk_token,
         'lang': 'ru',
         'v': 5.199,
     }
-    try:
-        method = params_depends.setdefault('groups.getById')[0]
-        params.update({params_depends.get(method)[0]: abs(_id)})
-        params_depends.get(method)[0]: abs(_id)
-        response = requests.get(f'https://api.vk.com/method/{method}', params=params)
-        out = params_depends.get(method)[1](response)
-        params_depends.pop(method)
-        print(out)
-    except KeyError:
-        method = params_depends.setdefault('users.get')[0]
-        params.update({params_depends.get(method)[0]: abs(_id)})
-        response = requests.get(f'https://api.vk.com/method/{method}', params=params)
-        out = params_depends.get(method)[1](response)
-        print(out)
+    params_depends = {
+        'groups.getById': [
+            'group_id',
+            'groups.getById',
+            lambda x: x.json()['response']['groups'][0].get('name')
+        ],
+        'users.get': [
+            'user_ids',
+            'users.get',
+            lambda x: f"{x.json()['response'][0].get('first_name')} {x.json()['response'][0].get('last_name')}"
+        ]
+    }
+    if _id < 0:
+        method = params_depends['groups.getById']
+    else:
+        method = params_depends['users.get']
+    params.update({method[0]: abs(_id)})
+    response = requests.get(f'https://api.vk.com/method/{method[1]}', params=params)
+    output = method[2](response)
+    return output
 
 
 def get_contact(text: str | None) -> str | None:
@@ -63,22 +61,36 @@ def de_anonymization(signer_id: int | None, phone_number: str | None) -> int | N
     return signer_id
 
 
+def get_attachments(data: dict) -> str:
+    print(data.get('text'))
+    print('----------------------------------')
+    attachments = data.get('copy_history')
+    if attachments:
+        for line in attachments[0].get('attachments'):
+            type_ = line.get('type')
+            print(type_)
+            print(':')
+            for k, v in line.get(type_).items():
+                print(f"key: {k}, value: {v}")
+            print('--------------------')
+
+
 class Post:
     def __init__(self, data: dict):
         self.post_id = data.get('id')
-        self.time = data.get('time')
+        self.time = data.get('date')
         self.group_id = data.get('owner_id')
-        self.group_name = get_name_by_id(_id=self.group_id, method='groups.getById')
+        self.group_name = get_name_by_id(_id=self.group_id)
         self.signer_phone_number = get_contact(text=data.get('text'))
         self.signer_id = de_anonymization(signer_id=data.get('signer_id'),
                                           phone_number=self.signer_phone_number)
-        self.signer_name = get_name_by_id(_id=self.signer_id, method='users.get')
+        self.signer_name = get_name_by_id(_id=self.signer_id)
         self.marked_as_ads = True if data.get('marked_as_ads') == 1 else False
         self.text = data.get('text')
         self.repost = True if data.get('copy_history') else False
         self.repost_place_id = data['copy_history'][0].get('from_id') if self.repost else None
         self.repost_place_name = get_name_by_id(_id=self.repost_place_id)
-        # self.attachments = get_attachments(data)
+        self.attachments = get_attachments(data)
 
     def display(self):
         print('self.post_id---', self.post_id)
