@@ -1,4 +1,3 @@
-
 from autoposting.start import start_autoposting
 
 

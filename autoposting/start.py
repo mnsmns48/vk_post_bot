@@ -46,7 +46,7 @@ def connect_wall(group_id: int) -> List:
                          'v': 5.199,
                          'owner_id': group_id,
                          'count': hv.posts_quantity,
-                         'offset': 2
+                         'offset': 0
                      })
     return r.json()['response']['items']
 
@@ -60,6 +60,7 @@ def start_autoposting():
             print(count)
             one_post = Post(line)
             count += 1
+            time.sleep(3)
     #         text = line.get('text')
     #         print(get_contact(text=text))
     #         print('---------------------------------')

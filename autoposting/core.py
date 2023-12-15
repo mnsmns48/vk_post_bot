@@ -69,34 +69,20 @@ def get_video(attachments: dict):
 
 
 def get_attachments(data: dict, repost: bool) -> dict:
-    print(data.get('attachments'))
+    attachment_depends = {
+        'video': lambda x: f"https://vk.com/video{x['owner_id']}_{x['id']}",
+        'photo': lambda x: x['sizes'][-1].get('url'),
+        'doc': lambda x: x['doc']['preview']['photo']['sizes'][-1].get('src'),
+        'link': lambda x: x.get('url'),
+        'audio': lambda x: x.get('url')
 
-    # attachment_depends = {
-    #     'video': lambda x: f"https://vk.com/video{x['owner_id']}_{x['id']}",
-    #     'photo': lambda x: x['sizes'][-1].get('url'),
-    #     'doc': lambda x: x['doc']['preview']['photo']['sizes'][-1].get('src'),
-    #     'link': lambda x: x.get('url'),
-    #     'audio': lambda x: x
-    # }
-    # attach_list = list()
-    # if repost:
-    #     data.update(attachments=data['copy_history'][0]['attachments'])
-    # atts = data.get('attachments')
-    # att_dict = dict()
-    # for attachment in atts:
-    #     att_type = attachment.get('type')
-    #     depends_func = attachment_depends.get(att_type)
-    #     att_dict[att_type] = att_dict.get(att_type, []) + [depends_func(attachment.get(att_type))]
-    # print(att_dict)
-    # print('-------')
-
-    # print('----------------------------------')
-    # attachments = data.get('copy_history')
-    # if attachments:
-    #     for line in attachments[0].get('attachments'):
-    #         type_ = line.get('type')
-    #         print(type_)
-    #         print(':')
-    #         for k, v in line.get(type_).items():
-    #             print(f"key: {k}, value: {v}")
-    #         print('--------------------')
+    }
+    if repost:
+        data.update(attachments=data['copy_history'][0]['attachments'])
+    atts = data.get('attachments')
+    att_dict = dict()
+    for attachment in atts:
+        att_type = attachment.get('type')
+        depends_func = attachment_depends.get(att_type)
+        att_dict[att_type] = att_dict.get(att_type, []) + [depends_func(attachment.get(att_type))]
+    return att_dict
