@@ -101,7 +101,7 @@ def get_attachments(data: dict, repost: bool) -> str | None:
             depends_func = attachment_depends.get(att_type)
             att_dict[att_type] = att_dict.get(att_type, []) + [depends_func(attachment.get(att_type))]
 
-        """ Checking whether there are videos in attachments and downloading """
+        """ Checking whether there are VIDEOS in attachments and downloading """
 
         videos = att_dict.get('video')
         if videos:
@@ -110,7 +110,7 @@ def get_attachments(data: dict, repost: bool) -> str | None:
                 ydl.download(videos)
                 time.sleep(3)
 
-        """ Checking whether there are photos in attachments and downloading """
+        """ Checking whether there are PHOTOS in attachments and downloading """
 
         photos = att_dict.get('photo')
         if photos:
@@ -120,9 +120,10 @@ def get_attachments(data: dict, repost: bool) -> str | None:
                     for chunk in requests.get(photo).iter_content(100000):
                         fd.write(chunk)
                         time.sleep(2.3)
-                print('photos downloaded')
+                print(f'photo {name} downloaded')
 
-        """ docs check in attachments """
+        """ Checking whether there are DOCS in attachments and downloading """
+
         docs = att_dict.get('doc')
         if docs:
             for doc in docs:
