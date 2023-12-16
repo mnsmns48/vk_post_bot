@@ -1,3 +1,4 @@
+import os
 import time
 from typing import List
 import requests
@@ -22,7 +23,7 @@ class Post:
         self.repost_place_id = data['copy_history'][0].get('from_id') if self.repost else None
         self.repost_place_name = get_name_by_id(_id=self.repost_place_id)
         self.attachments = get_attachments(data, repost=self.repost)
-        self.source = 'self.source'
+        self.source = f"https://vk.com/wall{data.get('from_id')}_{data.get('id')}"
 
     def display(self):
         print('self.post_id---', self.post_id)
@@ -37,7 +38,12 @@ class Post:
         print('self.repost---', self.repost)
         print('self.repost_place_id---', self.repost_place_id)
         print('self.repost_place_name---', self.repost_place_name)
+        print('self.attachments', self.attachments)
+        print('self.source', self.source)
         print('------------------------------------')
+
+    def send_to_telegram(self):
+        pass
 
 
 def connect_wall(group_id: int) -> List:
@@ -47,21 +53,18 @@ def connect_wall(group_id: int) -> List:
                          'v': 5.199,
                          'owner_id': group_id,
                          'count': hv.posts_quantity,
-                         'offset': 0
+                         'offset': 4
                      })
     return r.json()['response']['items']
 
 
 def start_autoposting():
     for group_id in hv.vk_wall_id:
-        response = connect_wall(group_id)
+        volume_posts = connect_wall(group_id)
         # response.reverse()
-        for line in response:
-            one_post = Post(line)
-            time.sleep(3)
-    #         text = line.get('text')
-    #         print(get_contact(text=text))
-    #         print('---------------------------------')
-    #         await asyncio.sleep(1)
-    # async with engine.begin() as conn:
-    #     await conn.run_sync(Posts.metadata.create_all)
+        for separate in volume_posts:
+            one_post = Post(separate)
+            files_list = [files for _, _, files in os.walk(hv.attach_catalog)]
+            if files_list[0]:
+                one_post.send_to_telegram()
+            time.sleep(10)

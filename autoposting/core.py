@@ -92,7 +92,7 @@ def get_attachments(data: dict, repost: bool) -> str | None:
         data.update(attachments=data['copy_history'][0]['attachments'])
     attachments = data.get('attachments')
 
-    """ Checking whether there are attachments in post """
+    """ Checking attachments in post """
 
     if attachments:
         att_dict = dict()
@@ -101,40 +101,43 @@ def get_attachments(data: dict, repost: bool) -> str | None:
             depends_func = attachment_depends.get(att_type)
             att_dict[att_type] = att_dict.get(att_type, []) + [depends_func(attachment.get(att_type))]
 
-        """ Checking whether there are VIDEOS in attachments and downloading """
+        """ Checking VIDEOS in attachments and downloading """
 
-        videos = att_dict.get('video')
-        if videos:
-            ydl_opts = {'outtmpl': 'autoposting/attachments/%(title)s.%(ext)s'}
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download(videos)
-                time.sleep(3)
+        # videos = att_dict.get('video')
+        # if videos:
+        #     ydl_opts = {'outtmpl': '{hv.attach_catalog}%(title)s.%(ext)s'}
+        #     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        #         try:
+        #             ydl.download(videos)
+        #         except yt_dlp.utils.DownloadError:
+        #             pass
+        #         time.sleep(3)
 
-        """ Checking whether there are PHOTOS in attachments and downloading """
+        """ Checking PHOTOS in attachments and downloading """
 
-        photos = att_dict.get('photo')
-        if photos:
-            for photo in photos:
-                name = random.randrange(10000)
-                with open(f'autoposting/attachments/{str(name)}.jpg', 'wb') as fd:
-                    for chunk in requests.get(photo).iter_content(100000):
-                        fd.write(chunk)
-                        time.sleep(2.3)
-                print(f'photo {name} downloaded')
+        # photos = att_dict.get('photo')
+        # if photos:
+        #     for photo in photos:
+        #         name = random.randrange(10000)
+        #         with open(f'{hv.attach_catalog}{str(name)}.jpg', 'wb') as fd:
+        #             for chunk in requests.get(photo).iter_content(100000):
+        #                 fd.write(chunk)
+        #                 time.sleep(2.3)
+        #         print(f'photo--{name}--downloaded')
 
-        """ Checking whether there are DOCS in attachments and downloading """
+        """ Checking DOCS in attachments and downloading """
 
-        docs = att_dict.get('doc')
-        if docs:
-            for doc in docs:
-                with open(f"autoposting/attachments/"
-                          f"{doc.get('title')}.{doc.get('ext')}", 'wb') as fd:
-                    for chunk in requests.get(doc.get('link')).iter_content(100000):
-                        fd.write(chunk)
-                        time.sleep(2.3)
-                print('doc downloaded')
+        # docs = att_dict.get('doc')
+        # if docs:
+        #     for doc in docs:
+        #         with open(f"{hv.attach_catalog}{doc.get('title')}.{doc.get('ext')}", 'wb') as fd:
+        #             for chunk in requests.get(doc.get('link')).iter_content(100000):
+        #                 fd.write(chunk)
+        #                 time.sleep(2.3)
+        #         print('doc downloaded')
+
         dict_variable = ' '.join([f'{key.capitalize()}:{len(value)}' for key, value in att_dict.items()])
-        print(dict_variable)
+        return dict_variable
 
 
 """ Attachments Dependencies """
@@ -144,5 +147,6 @@ attachment_depends = {
     'photo': lambda x: x['sizes'][-1].get('url'),
     'doc': docs_attachment_parsing,
     'link': lambda x: x.get('url'),
-    'audio': lambda x: x.get('url')
+    'audio': lambda x: x.get('url'),
+    'poll': lambda x: x.get('question')
 }

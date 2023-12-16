@@ -18,6 +18,7 @@ class Hidden:
     db_password: str
     db_local_port: int
     db_name: str
+    attach_catalog: str
 
 
 def load_hidden_vars(path: str):
@@ -36,7 +37,8 @@ def load_hidden_vars(path: str):
         db_username=env.str("DB_USERNAME"),
         db_password=env.str("DB_PASSWORD"),
         db_local_port=env.int("DB_LOCAL_PORT"),
-        db_name=env.str("DB_NAME")
+        db_name=env.str("DB_NAME"),
+        attach_catalog=env.str("ATTACH_CATALOG")
 
     )
 
