@@ -22,6 +22,7 @@ class Post:
         self.repost_place_id = data['copy_history'][0].get('from_id') if self.repost else None
         self.repost_place_name = get_name_by_id(_id=self.repost_place_id)
         self.attachments = get_attachments(data, repost=self.repost)
+        self.source = 'self.source'
 
     def display(self):
         print('self.post_id---', self.post_id)
@@ -55,11 +56,8 @@ def start_autoposting():
     for group_id in hv.vk_wall_id:
         response = connect_wall(group_id)
         # response.reverse()
-        count = 0
         for line in response:
-            print(count)
             one_post = Post(line)
-            count += 1
             time.sleep(3)
     #         text = line.get('text')
     #         print(get_contact(text=text))

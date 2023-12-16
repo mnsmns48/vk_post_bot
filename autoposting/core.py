@@ -1,4 +1,8 @@
 import re
+import time
+import random
+from typing import Callable, Any, Dict
+
 import requests
 import yt_dlp
 from autoposting.crud import check_phone_number
@@ -59,30 +63,85 @@ def de_anonymization(signer_id: int | None, phone_number: str | None) -> int | N
     return signer_id
 
 
-def get_video(attachments: dict):
-    video_list = list()
-    for video in attachments.get('video'):
-        video_list.append(video)
-    ydl_opts = {'outtmpl': 'attachments/%(title)s.%(ext)s'}
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download(video_list)
-
-
-def get_attachments(data: dict, repost: bool) -> dict:
-    attachment_depends = {
-        'video': lambda x: f"https://vk.com/video{x['owner_id']}_{x['id']}",
-        'photo': lambda x: x['sizes'][-1].get('url'),
-        'doc': lambda x: x['doc']['preview']['photo']['sizes'][-1].get('src'),
-        'link': lambda x: x.get('url'),
-        'audio': lambda x: x.get('url')
-
+def docs_attachment_parsing(data: dict) -> dict[str, Any]:
+    """ Docs types:
+        1 — text docs;
+        3 — gif;
+        4 — pics;"""
+    docs_depends = {
+        1: lambda x: {
+            'link': x.get('url'),
+            'title': x.get('title'),
+            'ext': x.get('ext')},
+        3: lambda x: {
+            'link': x['preview']['video'].get('src'),
+            'title': x.get('title'),
+            'ext': x.get('ext')},
+        4: lambda x: {
+            'link': x['preview']['photo']['sizes'][-1].get('src'),
+            'title': x.get('title'),
+            'ext': x.get('ext')}
     }
+    func = docs_depends.get(data.get('type'))
+    response = func(data)
+    return response
+
+
+def get_attachments(data: dict, repost: bool) -> str | None:
     if repost:
         data.update(attachments=data['copy_history'][0]['attachments'])
-    atts = data.get('attachments')
-    att_dict = dict()
-    for attachment in atts:
-        att_type = attachment.get('type')
-        depends_func = attachment_depends.get(att_type)
-        att_dict[att_type] = att_dict.get(att_type, []) + [depends_func(attachment.get(att_type))]
-    return att_dict
+    attachments = data.get('attachments')
+
+    """ Checking whether there are attachments in post """
+
+    if attachments:
+        att_dict = dict()
+        for attachment in attachments:
+            att_type = attachment.get('type')
+            depends_func = attachment_depends.get(att_type)
+            att_dict[att_type] = att_dict.get(att_type, []) + [depends_func(attachment.get(att_type))]
+
+        """ Checking whether there are videos in attachments and downloading """
+
+        videos = att_dict.get('video')
+        if videos:
+            ydl_opts = {'outtmpl': 'autoposting/attachments/%(title)s.%(ext)s'}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download(videos)
+                time.sleep(3)
+
+        """ Checking whether there are photos in attachments and downloading """
+
+        photos = att_dict.get('photo')
+        if photos:
+            for photo in photos:
+                name = random.randrange(10000)
+                with open(f'autoposting/attachments/{str(name)}.jpg', 'wb') as fd:
+                    for chunk in requests.get(photo).iter_content(100000):
+                        fd.write(chunk)
+                        time.sleep(2.3)
+                print('photos downloaded')
+
+        """ docs check in attachments """
+        docs = att_dict.get('doc')
+        if docs:
+            for doc in docs:
+                with open(f"autoposting/attachments/"
+                          f"{doc.get('title')}.{doc.get('ext')}", 'wb') as fd:
+                    for chunk in requests.get(doc.get('link')).iter_content(100000):
+                        fd.write(chunk)
+                        time.sleep(2.3)
+                print('doc downloaded')
+        dict_variable = ' '.join([f'{key.capitalize()}:{len(value)}' for key, value in att_dict.items()])
+        print(dict_variable)
+
+
+""" Attachments Dependencies """
+
+attachment_depends = {
+    'video': lambda x: f"https://vk.com/video{x['owner_id']}_{x['id']}",
+    'photo': lambda x: x['sizes'][-1].get('url'),
+    'doc': docs_attachment_parsing,
+    'link': lambda x: x.get('url'),
+    'audio': lambda x: x.get('url')
+}

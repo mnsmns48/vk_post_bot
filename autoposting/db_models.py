@@ -29,6 +29,7 @@ class Posts(Base):
     repost_source_id: Mapped[int | None] = mapped_column(BigInteger)
     repost_source_name: Mapped[str | None]
     attachments: Mapped[str | None]
+    source: Mapped[str]
 
     def create_table(self):
         self.metadata.create_all(bind=engine)
