@@ -1,7 +1,9 @@
+import json
 import os
 import time
 from typing import List
 import requests
+
 from autoposting.core import get_attachments, get_name_by_id, get_contact, de_anonymization
 
 from cfg import hv
@@ -42,8 +44,63 @@ class Post:
         print('self.source', self.source)
         print('------------------------------------')
 
-    def send_to_telegram(self):
-        pass
+    # @staticmethod
+    def send_to_telegram(self, files: list | None):
+        exts = {
+            'jpg': 'photo',
+            'png': 'photo',
+            'gif': 'photo',
+            'jpeg': 'photo',
+            'mp4': 'video',
+            'mov': 'video',
+            'mkv': 'video',
+            'm4v': 'video',
+            'txt': 'document',
+            'pdf': 'document',
+            'doc': 'document',
+            'docx': 'document',
+            'xls': 'document',
+            'xlsx': 'document',
+            'mp3': 'audio',
+            'aac': 'audio'
+        }
+        files_dict = dict()
+        if files:
+            files = files[0]
+            for file in files:
+                ext = file.split('.')[-1]
+                files_dict[exts.get(ext)] = files_dict.get(exts.get(ext), []) + [file]
+            attachments = {f'{item}': open(f'{hv.attach_catalog}/{item}', 'rb')
+                           for item in files}
+            print(files_dict)
+            print(attachments)
+            # list_attach = list()
+            # photo = files_dict.get('photo')
+            # if photo:
+            #     for one_p in range(len(photo)):
+            #         list_attach.append({'type': 'photo',
+            #                              'media': f'attach://attach_unit{one_p}',
+            #                              'parse_mode': 'HTML'})
+            # video = files_dict.get('video')
+            # if video:
+            #     for one_v in range(len(video)):
+            #         list_attach.append({'type': 'video',
+            #                              'media': f'attach://attach_unit{one_v}',
+            #                              'parse_mode': 'HTML'})
+            # document = files_dict.get('document')
+            # if document:
+            #     for one_d in range(len(document)):
+            #         list_attach.append({'type': 'document',
+            #                              'media': f'attach://attach_unit{one_d}',
+            #                              'parse_mode': 'HTML'})
+            # list_attach[0]['caption'] = 'подпись'
+            # print(list_attach)
+
+        # media = json.dumps(list_attach)
+        # params = {"chat_id": hv.tg_chat_id,
+        #           "media": media,
+        #           "disable_notification": True}
+        # requests.post(hv.request_url_blank + '/sendMediaGroup', params=params, files=attachments)
 
 
 def connect_wall(group_id: int) -> List:
@@ -53,7 +110,7 @@ def connect_wall(group_id: int) -> List:
                          'v': 5.199,
                          'owner_id': group_id,
                          'count': hv.posts_quantity,
-                         'offset': 4
+                         'offset': 0
                      })
     return r.json()['response']['items']
 
@@ -65,6 +122,4 @@ def start_autoposting():
         for separate in volume_posts:
             one_post = Post(separate)
             files_list = [files for _, _, files in os.walk(hv.attach_catalog)]
-            if files_list[0]:
-                one_post.send_to_telegram()
-            time.sleep(10)
+            one_post.send_to_telegram(files=files_list)

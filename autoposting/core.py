@@ -105,7 +105,7 @@ def get_attachments(data: dict, repost: bool) -> str | None:
 
         # videos = att_dict.get('video')
         # if videos:
-        #     ydl_opts = {'outtmpl': '{hv.attach_catalog}%(title)s.%(ext)s'}
+        #     ydl_opts = {'outtmpl': f'{hv.attach_catalog}%(title)s.%(ext)s'}
         #     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         #         try:
         #             ydl.download(videos)
