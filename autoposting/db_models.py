@@ -1,7 +1,8 @@
 import datetime
 
-from sqlalchemy import DateTime, func, BigInteger
+from sqlalchemy import DateTime, func, BigInteger, Sequence
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
+
 
 from cfg import engine
 
@@ -15,7 +16,7 @@ class Base(DeclarativeBase):
 
 
 class Posts(Base):
-    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     post_id: Mapped[int | None] = mapped_column(BigInteger)
     time: Mapped[datetime.datetime | None] = mapped_column(
         DateTime(timezone=True), server_default=func.now())

@@ -1,3 +1,4 @@
+import json
 import re
 import time
 import random
@@ -5,6 +6,8 @@ from typing import Callable, Any, Dict
 
 import requests
 import yt_dlp
+from requests import Response
+
 from autoposting.crud import check_phone_number
 from cfg import hv
 
@@ -19,7 +22,7 @@ def get_name_by_id(_id: int) -> str:
     }
     params_depends = {
         'groups.getById': [
-            'group_id',
+            'group_ids',
             'groups.getById',
             lambda x: x.json()['response']['groups'][0].get('name')
         ],
@@ -103,41 +106,62 @@ def get_attachments(data: dict, repost: bool) -> str | None:
 
         """ Checking VIDEOS in attachments and downloading """
 
-        # videos = att_dict.get('video')
-        # if videos:
-        #     ydl_opts = {'outtmpl': f'{hv.attach_catalog}%(title)s.%(ext)s'}
-        #     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        #         try:
-        #             ydl.download(videos)
-        #         except yt_dlp.utils.DownloadError:
-        #             pass
-        #         time.sleep(3)
+        videos = att_dict.get('video')
+        if videos:
+            ydl_opts = {'outtmpl': f'{hv.attach_catalog}%(title)s.%(ext)s'}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                try:
+                    ydl.download(videos)
+                    time.sleep(15)
+                except yt_dlp.utils.DownloadError as error:
+                    time.sleep(1)
 
         """ Checking PHOTOS in attachments and downloading """
 
-        # photos = att_dict.get('photo')
-        # if photos:
-        #     for photo in photos:
-        #         name = random.randrange(10000)
-        #         with open(f'{hv.attach_catalog}{str(name)}.jpg', 'wb') as fd:
-        #             for chunk in requests.get(photo).iter_content(100000):
-        #                 fd.write(chunk)
-        #                 time.sleep(2.3)
-        #         print(f'photo--{name}--downloaded')
+        photos = att_dict.get('photo')
+        if photos:
+            for photo in photos:
+                name = random.randrange(10000)
+                with open(f'{hv.attach_catalog}{str(name)}.jpg', 'wb') as fd:
+                    for chunk in requests.get(photo).iter_content(100000):
+                        fd.write(chunk)
+                        time.sleep(2.3)
 
         """ Checking DOCS in attachments and downloading """
 
-        # docs = att_dict.get('doc')
-        # if docs:
-        #     for doc in docs:
-        #         with open(f"{hv.attach_catalog}{doc.get('title')}.{doc.get('ext')}", 'wb') as fd:
-        #             for chunk in requests.get(doc.get('link')).iter_content(100000):
-        #                 fd.write(chunk)
-        #                 time.sleep(2.3)
-        #         print('doc downloaded')
-
+        docs = att_dict.get('doc')
+        if docs:
+            for doc in docs:
+                with open(f"{hv.attach_catalog}{doc.get('title')}.{doc.get('ext')}", 'wb') as fd:
+                    for chunk in requests.get(doc.get('link')).iter_content(100000):
+                        fd.write(chunk)
+                        time.sleep(2.3)
         dict_variable = ' '.join([f'{key.capitalize()}:{len(value)}' for key, value in att_dict.items()])
         return dict_variable
+
+
+def send_media_group(attachments: list, files: list, caption: str | None) -> Response:
+    attachment_files = {f'{item}': open(f'{hv.attach_catalog}/{item}', 'rb')
+                        for item in files}
+    if caption:
+        attachments[0]['caption'] = caption if len(caption) <= 1024 else caption[:1024]
+    media = json.dumps(attachments)
+    params = {"chat_id": hv.tg_chat_id,
+              'media': media,
+              "disable_notification": hv.notification}
+    response = requests.post(hv.request_url_blank + '/sendMediaGroup', params=params, files=attachment_files)
+    return response
+
+
+def send_only_text(text: str) -> Response:
+    params = {"chat_id": hv.tg_chat_id,
+              "text": text,
+              "parse_mode": 'HTML',
+              "disable_web_page_preview": True,
+              "disable_notification": hv.notification
+              }
+    response = requests.post(hv.request_url_blank + '/sendMessage', params=params)
+    return response
 
 
 """ Attachments Dependencies """
