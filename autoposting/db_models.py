@@ -1,9 +1,7 @@
 import datetime
 
-from sqlalchemy import DateTime, func, BigInteger, Sequence
+from sqlalchemy import DateTime, func, BigInteger
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
-
-
 from cfg import engine
 
 

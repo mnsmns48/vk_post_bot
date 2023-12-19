@@ -2,14 +2,19 @@ import json
 import re
 import time
 import random
-from typing import Callable, Any, Dict
-
+from datetime import datetime
+from typing import Any
 import requests
+import tzlocal
 import yt_dlp
 from requests import Response
-
 from autoposting.crud import check_phone_number
 from cfg import hv
+
+
+def date_transform(date: int) -> datetime:
+    local_timezone = tzlocal.get_localzone()
+    return datetime.fromtimestamp(date, local_timezone).replace(tzinfo=None)
 
 
 def get_name_by_id(_id: int) -> str:
@@ -42,25 +47,26 @@ def get_name_by_id(_id: int) -> str:
     return output
 
 
-def get_contact(text: str | None) -> str | None:
+def get_contact(text: str | None) -> int | None:
     edit_text = text.replace('-', '').replace(')', '').replace('(', '')
     match = re.findall(r'\b\+?[7,8](\s*\d{3}\s*\d{3}\s*\d{2}\s*\d{2})\b', edit_text)
     try:
         if match[0]:
             response = match[0].replace(' ', '')
             if len(response) == 10:
-                return f"7{response}"
+                r = '7' + response
+                return int(r)
     except IndexError:
         return None
 
 
-def de_anonymization(signer_id: int | None, phone_number: str | None) -> int | None:
+def de_anonymization(signer_id: int | None, phone_number: int | None) -> int | None:
     if signer_id is None and phone_number is None:
         return None
     elif isinstance(signer_id, int) and phone_number is None:
         return signer_id
     elif signer_id is None and phone_number:
-        find_signer_in_db = check_phone_number(number=int(phone_number))
+        find_signer_in_db = check_phone_number(number=phone_number)
         if find_signer_in_db:
             return find_signer_in_db
     return signer_id
@@ -113,7 +119,7 @@ def get_attachments(data: dict, repost: bool) -> str | None:
                 try:
                     ydl.download(videos)
                     time.sleep(15)
-                except yt_dlp.utils.DownloadError as error:
+                except yt_dlp.utils.DownloadError:
                     time.sleep(1)
 
         """ Checking PHOTOS in attachments and downloading """

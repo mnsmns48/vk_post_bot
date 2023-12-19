@@ -1,13 +1,11 @@
-from datetime import datetime
-
 from autoposting.core import get_name_by_id, get_contact, de_anonymization, get_attachments, send_media_group, \
-    send_only_text
+    send_only_text, date_transform
 
 
 class Post:
     def __init__(self, data: dict):
         self.post_id = data.get('id')
-        self.time = datetime.utcfromtimestamp(data.get('date')).strftime('%Y-%m-%d %H:%M:%S')
+        self.time = date_transform(data.get('date'))
         self.group_id = data.get('owner_id')
         self.group_name = get_name_by_id(_id=self.group_id)
         self.signer_phone_number = get_contact(text=data.get('text'))
@@ -18,7 +16,7 @@ class Post:
         self.repost = True if data.get('copy_history') else False
         self.text = data.get('text') if self.repost is False else data['copy_history'][0].get('text')
         self.repost_place_id = data['copy_history'][0].get('from_id') if self.repost else None
-        self.repost_place_name = get_name_by_id(_id=self.repost_place_id)
+        self.repost_place_name = get_name_by_id(_id=self.repost_place_id) if self.repost else None
         self.attachments = get_attachments(data, repost=self.repost)
         self.source = f"https://vk.com/wall{data.get('from_id')}_{data.get('id')}"
 
@@ -29,7 +27,8 @@ class Post:
             repost = f"<b> → → → → Р Е П О С Т ↓ ↓ ↓ ↓</b>\n" \
                      f"<a href='https://vk.com/{repost_place}{self.repost_place_id}'>{self.repost_place_name}</a>\n\n"
             caption = repost + caption
-        caption = f"{caption}\n<a href='https://vk.com/id{self.signer_id}'> → →  →  {self.signer_name}</a>\n"
+        caption = f"{caption}\n<a href='https://vk.com/id{self.signer_id}'>" \
+                  f" → → →  {self.signer_name}</a>\n" if self.signer_name != 'Анонимно' else f"{caption}"
         if self.marked_as_ads:
             caption = caption + '\n<i>          Платная реклама</i>\n'
         return caption

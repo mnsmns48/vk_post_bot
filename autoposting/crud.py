@@ -1,7 +1,8 @@
-from sqlalchemy import select, insert, Sequence, Table, Column, Integer, schema
+from typing import Sequence
+
+from sqlalchemy import select, insert, Sequence
 from sqlalchemy.orm import Session
-
-
+from collections import Counter
 
 from autoposting.db_models import Posts
 from cfg import engine
@@ -10,8 +11,14 @@ from cfg import engine
 def check_phone_number(number: int) -> int | None:
     with Session(engine) as session:
         query = select(Posts.signer_id).filter(Posts.phone_number == number)
-        response = session.execute(query).scalar_one_or_none()
-    return response
+        response = session.execute(query).scalars().all()
+    try:
+        counter = Counter(response)
+        item, count = max(counter.items(), key=lambda p: p[::-1])
+        return item
+    except ValueError:
+        if len(response) == 0:
+            return None
 
 
 def write_post_data(data):
@@ -35,3 +42,15 @@ def write_post_data(data):
                                     )
         session.execute(stmt)
         session.commit()
+
+
+def read_post_data(post_id: int, group_id: int, text: str) -> bool:
+    with Session(engine) as session:
+        query = select(Posts.post_id, Posts.group_id, Posts.text) \
+            .filter(Posts.post_id == post_id, Posts.group_id == group_id, Posts.text == text)
+        response = session.execute(query).fetchall()
+    print(response)
+    print(type(response))
+    # if response == (post_id, group_id):
+    #     return False
+    # return True
