@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import time
 import random
@@ -7,6 +8,7 @@ from typing import Any
 import requests
 import tzlocal
 import yt_dlp
+import random
 from requests import Response
 from autoposting.crud import check_phone_number
 from cfg import hv
@@ -15,6 +17,14 @@ from cfg import hv
 def date_transform(date: int) -> datetime:
     local_timezone = tzlocal.get_localzone()
     return datetime.fromtimestamp(date, local_timezone).replace(tzinfo=None)
+
+
+def rename_unknown_video_files(files: list) -> list[str]:
+    for file in files:
+        if '.unknown_video' in file:
+            os.rename(f"{hv.attach_catalog}{file}", f"{hv.attach_catalog}{random.randint(100)}video.mp4")
+            files = [f"{file[:3]}video.mp4" if '.unknown_video' in file else file]
+    print(files)
 
 
 def get_name_by_id(_id: int) -> str:

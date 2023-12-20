@@ -46,11 +46,14 @@ def write_post_data(data):
 
 def read_post_data(post_id: int, group_id: int, text: str) -> bool:
     with Session(engine) as session:
-        query = select(Posts.post_id, Posts.group_id, Posts.text) \
-            .filter(Posts.post_id == post_id, Posts.group_id == group_id, Posts.text == text)
-        response = session.execute(query).fetchall()
-    print(response)
-    print(type(response))
-    # if response == (post_id, group_id):
-    #     return False
-    # return True
+        query = select(Posts.post_id, Posts.group_id) \
+            .filter(Posts.post_id == post_id, Posts.group_id == group_id)
+        response = session.execute(query).fetchone()
+    if response == (post_id, group_id):
+        return False
+    with Session(engine) as session:
+        query = select(Posts.text).filter(Posts.text == text)
+        response_text = session.execute(query).fetchone()
+    if response_text:
+        return False
+    return True

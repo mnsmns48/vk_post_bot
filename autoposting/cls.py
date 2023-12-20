@@ -1,5 +1,8 @@
+import os
+
 from autoposting.core import get_name_by_id, get_contact, de_anonymization, get_attachments, send_media_group, \
     send_only_text, date_transform
+from cfg import hv
 
 
 class Post:

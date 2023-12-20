@@ -30,15 +30,15 @@ def start_autoposting():
                 check = read_post_data(post_id=separate.get('id'),
                                        group_id=separate.get('owner_id'),
                                        text=separate.get('text'))
-        #         if check:
-        #             one_post = Post(separate)
-        #             files_list = [files for _, _, files in os.walk(hv.attach_catalog)]
-        #             one_post.send_to_telegram(files=files_list[0])
-        #             for path in Path(hv.attach_catalog).iterdir():
-        #                 if path.is_dir():
-        #                     rmtree(path)
-        #                 else:
-        #                     path.unlink()
-        #             write_post_data(one_post)
-        # print('Новых постов нет')
+                if check:
+                    one_post = Post(separate)
+                    files_list = [files for _, _, files in os.walk(hv.attach_catalog)]
+                    one_post.send_to_telegram(files=files_list[0])
+                    # for path in Path(hv.attach_catalog).iterdir():
+                    #     if path.is_dir():
+                    #         rmtree(path)
+                    #     else:
+                    #         path.unlink()
+                    write_post_data(one_post)
+        print('Новых постов нет')
         time.sleep(100)
