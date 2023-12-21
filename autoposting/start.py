@@ -23,6 +23,7 @@ def connect_wall(group_id: int, offset: int) -> List:
 
 
 def start_autoposting():
+    print('start_autoposting')
     while True:
         for group_id in hv.vk_wall_id:
             volume_posts = connect_wall(group_id=group_id, offset=hv.posts_offset)
@@ -36,11 +37,11 @@ def start_autoposting():
                     files_list = [files for _, _, files in os.walk(hv.attach_catalog)]
                     files_edited = rename_unknown_video_files(files_list[0])
                     one_post.send_to_telegram(files=files_edited)
-                    for path in Path(hv.attach_catalog).iterdir():
-                        if path.is_dir():
-                            rmtree(path)
-                        else:
-                            path.unlink()
+                    # time.sleep(40)
+                    # for path in Path(hv.attach_catalog).iterdir():
+                    #     if path.is_dir():
+                    #         rmtree(path)
+                    #     else:
+                    #         path.unlink()
                     write_post_data(one_post)
-        print('Новых постов нет')
         time.sleep(100)

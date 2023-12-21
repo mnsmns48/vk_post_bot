@@ -7,16 +7,17 @@ from cfg import hv
 
 class Post:
     def __init__(self, data: dict):
+        self.repost = True if data.get('copy_history') else False
         self.post_id = data.get('id')
         self.time = date_transform(data.get('date'))
         self.group_id = data.get('owner_id')
         self.group_name = get_name_by_id(_id=self.group_id)
-        self.signer_phone_number = get_contact(text=data.get('text'))
-        self.signer_id = de_anonymization(signer_id=data.get('signer_id'),
+        self.signer_phone_number = get_contact(data=data, is_repost=self.repost)
+        self.signer_id = de_anonymization(data=data,
+                                          is_repost=self.repost,
                                           phone_number=self.signer_phone_number)
         self.signer_name = get_name_by_id(_id=self.signer_id)
         self.marked_as_ads = True if data.get('marked_as_ads') == 1 else False
-        self.repost = True if data.get('copy_history') else False
         self.text = data.get('text') if self.repost is False else data['copy_history'][0].get('text')
         self.repost_place_id = data['copy_history'][0].get('from_id') if self.repost else None
         self.repost_place_name = get_name_by_id(_id=self.repost_place_id) if self.repost else None
@@ -28,10 +29,10 @@ class Post:
         if self.repost:
             repost_place = 'public' if self.repost_place_id < 0 else 'id'
             repost = f"<b> → → → → Р Е П О С Т ↓ ↓ ↓ ↓</b>\n" \
-                     f"<a href='https://vk.com/{repost_place}{self.repost_place_id}'>{self.repost_place_name}</a>\n\n"
+                     f"<a href='https://vk.com/{repost_place}{abs(self.repost_place_id)}'>{self.repost_place_name}</a>\n"
             caption = repost + caption
         caption = f"{caption}\n<a href='https://vk.com/id{self.signer_id}'>" \
-                  f" → → →  {self.signer_name}</a>\n" if self.signer_name != 'Анонимно' else f"{caption}"
+                  f" → → →  {self.signer_name}</a>" if self.signer_name != 'Анонимно' else f"{caption}"
         if self.marked_as_ads:
             caption = caption + '\n<i>          Платная реклама</i>\n'
         return caption

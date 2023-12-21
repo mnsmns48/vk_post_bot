@@ -2,7 +2,6 @@ import json
 import os
 import re
 import time
-import random
 from datetime import datetime
 from typing import Any
 import requests
@@ -59,7 +58,11 @@ def get_name_by_id(_id: int) -> str:
     return output
 
 
-def get_contact(text: str | None) -> int | None:
+def get_contact(data: dict, is_repost: bool) -> int | None:
+    if is_repost:
+        text = data['copy_history'][0].get('text')
+    else:
+        text = data.get('text')
     edit_text = text.replace('-', '').replace(')', '').replace('(', '')
     match = re.findall(r'\b\+?[7,8](\s*\d{3}\s*\d{3}\s*\d{2}\s*\d{2})\b', edit_text)
     try:
@@ -72,7 +75,11 @@ def get_contact(text: str | None) -> int | None:
         return None
 
 
-def de_anonymization(signer_id: int | None, phone_number: int | None) -> int | None:
+def de_anonymization(data: dict, is_repost: bool, phone_number: int | None) -> int | None:
+    if is_repost:
+        signer_id = data['copy_history'][0].get('signer_id')
+    else:
+        signer_id = data.get('signer_id')
     if signer_id is None and phone_number is None:
         return None
     elif isinstance(signer_id, int) and phone_number is None:
@@ -128,11 +135,7 @@ def get_attachments(data: dict, repost: bool) -> str | None:
         if videos:
             ydl_opts = {'outtmpl': f'{hv.attach_catalog}%(title)s.%(ext)s'}
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                try:
-                    ydl.download(videos)
-                    time.sleep(35)
-                except yt_dlp.utils.DownloadError:
-                    time.sleep(1)
+                ydl.download(videos)
 
         """ Checking PHOTOS in attachments and downloading """
 
@@ -167,7 +170,10 @@ def send_media_group(attachments: list, files: list, caption: str | None) -> Res
     params = {"chat_id": hv.tg_chat_id,
               'media': media,
               "disable_notification": hv.notification}
-    response = requests.post(hv.request_url_blank + '/sendMediaGroup', params=params, files=attachment_files)
+    response = requests.post(hv.request_url_blank + '/sendMediaGroup',
+                             params=params,
+                             files=attachment_files,
+                             timeout=10000)
     return response
 
 
