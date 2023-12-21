@@ -5,6 +5,7 @@ from shutil import rmtree
 from typing import List
 import requests
 from autoposting.cls import Post
+from autoposting.core import rename_unknown_video_files
 from autoposting.crud import write_post_data, read_post_data
 from cfg import hv
 
@@ -33,12 +34,13 @@ def start_autoposting():
                 if check:
                     one_post = Post(separate)
                     files_list = [files for _, _, files in os.walk(hv.attach_catalog)]
-                    one_post.send_to_telegram(files=files_list[0])
-                    # for path in Path(hv.attach_catalog).iterdir():
-                    #     if path.is_dir():
-                    #         rmtree(path)
-                    #     else:
-                    #         path.unlink()
+                    files_edited = rename_unknown_video_files(files_list[0])
+                    one_post.send_to_telegram(files=files_edited)
+                    for path in Path(hv.attach_catalog).iterdir():
+                        if path.is_dir():
+                            rmtree(path)
+                        else:
+                            path.unlink()
                     write_post_data(one_post)
         print('Новых постов нет')
         time.sleep(100)

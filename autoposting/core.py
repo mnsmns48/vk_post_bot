@@ -22,9 +22,11 @@ def date_transform(date: int) -> datetime:
 def rename_unknown_video_files(files: list) -> list[str]:
     for file in files:
         if '.unknown_video' in file:
-            os.rename(f"{hv.attach_catalog}{file}", f"{hv.attach_catalog}{random.randint(100)}video.mp4")
-            files = [f"{file[:3]}video.mp4" if '.unknown_video' in file else file]
-    print(files)
+            files.remove(file)
+            r = random.randint(1, 1000)
+            os.rename(f"{hv.attach_catalog}{file}", f"{hv.attach_catalog}{r}video.mp4")
+            files.append(f"{r}video.mp4")
+    return files
 
 
 def get_name_by_id(_id: int) -> str:
@@ -128,7 +130,7 @@ def get_attachments(data: dict, repost: bool) -> str | None:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 try:
                     ydl.download(videos)
-                    time.sleep(15)
+                    time.sleep(35)
                 except yt_dlp.utils.DownloadError:
                     time.sleep(1)
 
