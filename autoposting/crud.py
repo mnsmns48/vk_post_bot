@@ -1,11 +1,12 @@
-from typing import Sequence
+from functools import wraps
+from typing import Sequence, Callable
 
 from sqlalchemy import select, insert, Sequence
 from sqlalchemy.orm import Session
 from collections import Counter
 
 from autoposting.db_models import Posts
-from cfg import engine
+from cfg import engine, hv
 
 
 def check_phone_number(number: int) -> int | None:
@@ -37,13 +38,26 @@ def write_post_data(data):
                                     is_repost=data.repost,
                                     repost_source_id=data.repost_place_id,
                                     repost_source_name=data.repost_place_name,
-                                    attachments=data.attachments,
+                                    attachments=data.attachments.get('to_db_str'),
                                     source=data.source,
                                     )
         session.execute(stmt)
         session.commit()
 
 
+def post_filter(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        response = func(*args, **kwargs)
+        for filter_one_word in hv.filter_words:
+            if filter_one_word in kwargs.get('text'):
+                response = False
+        return response
+
+    return wrapper
+
+
+@post_filter
 def read_post_data(post_id: int, group_id: int, text: str) -> bool:
     with Session(engine) as session:
         query = select(Posts.post_id, Posts.group_id) \

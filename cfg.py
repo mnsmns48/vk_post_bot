@@ -21,6 +21,7 @@ class Hidden:
     db_name: str
     attach_catalog: str
     request_url_blank: str
+    filter_words: list[str]
 
 
 def load_hidden_vars(path: str):
@@ -42,8 +43,8 @@ def load_hidden_vars(path: str):
         db_local_port=env.int("DB_LOCAL_PORT"),
         db_name=env.str("DB_NAME"),
         attach_catalog=env.str("ATTACH_CATALOG"),
-        request_url_blank=env.str("REQUEST_URL_BLANK") + env.str("BOT_TOKEN")
-
+        request_url_blank=env.str("REQUEST_URL_BLANK") + env.str("BOT_TOKEN"),
+        filter_words=list(env.str("FILTER_WORDS").split(',')),
     )
 
 

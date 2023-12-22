@@ -1,3 +1,4 @@
+import asyncio
 import os
 import time
 from pathlib import Path
@@ -5,7 +6,7 @@ from shutil import rmtree
 from typing import List
 import requests
 from autoposting.cls import Post
-from autoposting.core import rename_unknown_video_files
+from autoposting.core import rename_unknown_video_files, clear_attachments_path
 from autoposting.crud import write_post_data, read_post_data
 from cfg import hv
 
@@ -22,7 +23,7 @@ def connect_wall(group_id: int, offset: int) -> List:
     return r.json()['response']['items']
 
 
-def start_autoposting():
+async def start_autoposting():
     print('start_autoposting')
     while True:
         for group_id in hv.vk_wall_id:
@@ -34,14 +35,7 @@ def start_autoposting():
                                        text=separate.get('text'))
                 if check:
                     one_post = Post(separate)
-                    files_list = [files for _, _, files in os.walk(hv.attach_catalog)]
-                    files_edited = rename_unknown_video_files(files_list[0])
-                    one_post.send_to_telegram(files=files_edited)
-                    # time.sleep(40)
-                    # for path in Path(hv.attach_catalog).iterdir():
-                    #     if path.is_dir():
-                    #         rmtree(path)
-                    #     else:
-                    #         path.unlink()
+                    one_post.send_to_telegram()
                     write_post_data(one_post)
-        time.sleep(100)
+            clear_attachments_path()
+        await asyncio.sleep(100)

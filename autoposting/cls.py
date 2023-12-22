@@ -32,13 +32,14 @@ class Post:
                      f"<a href='https://vk.com/{repost_place}{abs(self.repost_place_id)}'>{self.repost_place_name}</a>\n"
             caption = repost + caption
         caption = f"{caption}\n<a href='https://vk.com/id{self.signer_id}'>" \
-                  f" → → →  {self.signer_name}</a>" if self.signer_name != 'Анонимно' else f"{caption}"
+                  f"   →    {self.signer_name}</a>" if self.signer_name != 'Анонимно' else f"{caption}"
         if self.marked_as_ads:
             caption = caption + '\n<i>          Платная реклама</i>\n'
         return caption
 
-    def send_to_telegram(self, files: list | None):
+    def send_to_telegram(self):
         caption = self.caption_preparation()
+        files = self.attachments.get('out_list')
         if files:
             ext_s = {
                 'jpg': 'photo',

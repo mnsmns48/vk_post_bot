@@ -3,6 +3,8 @@ import os
 import re
 import time
 from datetime import datetime
+from pathlib import Path
+from shutil import rmtree
 from typing import Any
 import requests
 import tzlocal
@@ -18,14 +20,17 @@ def date_transform(date: int) -> datetime:
     return datetime.fromtimestamp(date, local_timezone).replace(tzinfo=None)
 
 
-def rename_unknown_video_files(files: list) -> list[str]:
-    for file in files:
-        if '.unknown_video' in file:
-            files.remove(file)
-            r = random.randint(1, 1000)
-            os.rename(f"{hv.attach_catalog}{file}", f"{hv.attach_catalog}{r}video.mp4")
-            files.append(f"{r}video.mp4")
-    return files
+def clear_attachments_path():
+    files = [files for _, _, files in os.walk(hv.attach_catalog)]
+    st = []
+    st.append(files)
+    while len(st):
+        l = st.pop()
+        for x in l:
+            if type(x) is list:
+                st.append(x)
+            else:
+                print(x)
 
 
 def get_name_by_id(_id: int) -> str:
@@ -115,7 +120,7 @@ def docs_attachment_parsing(data: dict) -> dict[str, Any]:
     return response
 
 
-def get_attachments(data: dict, repost: bool) -> str | None:
+def get_attachments(data: dict, repost: bool) -> dict | None:
     if repost:
         data.update(attachments=data['copy_history'][0]['attachments'])
     attachments = data.get('attachments')
@@ -123,6 +128,7 @@ def get_attachments(data: dict, repost: bool) -> str | None:
     """ Checking attachments in post """
 
     if attachments:
+        out_list = list()
         att_dict = dict()
         for attachment in attachments:
             att_type = attachment.get('type')
@@ -130,23 +136,29 @@ def get_attachments(data: dict, repost: bool) -> str | None:
             att_dict[att_type] = att_dict.get(att_type, []) + [depends_func(attachment.get(att_type))]
 
         """ Checking VIDEOS in attachments and downloading """
-
         videos = att_dict.get('video')
         if videos:
-            ydl_opts = {'outtmpl': f'{hv.attach_catalog}%(title)s.%(ext)s'}
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download(videos)
+            for video in videos:
+                name = random.randint(1, 20)
+                ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.%(ext)s',
+                            'format': '[height<720]'}
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    result = ydl.extract_info(video)
+                    title = ydl.prepare_filename(result)
+                    if '.unknown_video' in title:
+                        os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
+                out_list.append(title.replace('.unknown_video', '.mp4').split('\\')[-1])
 
         """ Checking PHOTOS in attachments and downloading """
 
         photos = att_dict.get('photo')
         if photos:
             for photo in photos:
-                name = random.randrange(10000)
-                with open(f'{hv.attach_catalog}{str(name)}.jpg', 'wb') as fd:
+                name = random.randint(1, 20)
+                with open(f'{hv.attach_catalog}{name}.jpg', 'wb') as fd:
                     for chunk in requests.get(photo).iter_content(100000):
                         fd.write(chunk)
-                        time.sleep(2.3)
+                out_list.append(f'{name}.jpg')
 
         """ Checking DOCS in attachments and downloading """
 
@@ -157,8 +169,12 @@ def get_attachments(data: dict, repost: bool) -> str | None:
                     for chunk in requests.get(doc.get('link')).iter_content(100000):
                         fd.write(chunk)
                         time.sleep(2.3)
-        dict_variable = ' '.join([f'{key.capitalize()}:{len(value)}' for key, value in att_dict.items()])
-        return dict_variable
+                out_list.append(f"{doc.get('title')}.{doc.get('ext')}")
+        out_dict = {'to_db_str': ''.join([f'{key.capitalize()}:{len(value)}' for key, value in att_dict.items()]),
+                    'out_list': out_list}
+        print(out_dict)
+        return out_dict
+    return None
 
 
 def send_media_group(attachments: list, files: list, caption: str | None) -> Response:
