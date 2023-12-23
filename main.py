@@ -1,13 +1,16 @@
 import asyncio
 
-from autoposting.db_models import visitors
+from autoposting.db_models import Base
+from autoposting.start import start_autoposting
 from bot.main_bot import bot_working
+from cfg import engine
 
 
 async def main():
-    visitors.create_table()
-    await bot_working()
-# await start_autoposting()
+    # Base.metadata.drop_all(engine)
+    # Base.metadata.create_all(engine)
+    # await bot_working()
+    await start_autoposting()
 
 
 if __name__ == "__main__":

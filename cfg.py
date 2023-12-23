@@ -56,7 +56,7 @@ class CoreConfig(BaseSettings):
         f"postgresql+psycopg://{hv.db_username}:{hv.db_password}"
         f"@localhost:{hv.db_local_port}/{hv.db_name}"
     )
-    db_echo: bool = True
+    db_echo: bool = False
 
 
 dbconfig = CoreConfig()
