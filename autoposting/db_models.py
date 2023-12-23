@@ -4,6 +4,9 @@ from sqlalchemy import DateTime, func, BigInteger, Sequence
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
 from cfg import engine
 
+POSTS_ID = Sequence('posts_id_seq', start=1)
+VISITORS_ID = Sequence('visitors_id_seq', start=1)
+
 
 class Base(DeclarativeBase):
     __abstract__ = True
@@ -14,10 +17,10 @@ class Base(DeclarativeBase):
 
 
 class Posts(Base):
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, server_default=POSTS_ID.next_value())
     post_id: Mapped[int | None] = mapped_column(BigInteger)
     time: Mapped[datetime.datetime | None] = mapped_column(
-        DateTime(timezone=True), server_default=func.now())
+        DateTime(timezone=False), server_default=func.now())
     group_id: Mapped[int | None] = mapped_column(BigInteger)
     group_name: Mapped[str | None]
     signer_id: Mapped[int | None] = mapped_column(BigInteger)
@@ -35,9 +38,6 @@ class Posts(Base):
 
     def drop_table(self):
         self.metadata.drop_all(bind=engine)
-
-
-VISITORS_ID = Sequence('visitors_id_seq', start=1)
 
 
 class Visitors(Base):
