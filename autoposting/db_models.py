@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import DateTime, func, BigInteger
+from sqlalchemy import DateTime, func, BigInteger, Sequence
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
 from cfg import engine
 
@@ -37,4 +37,23 @@ class Posts(Base):
         self.metadata.drop_all(bind=engine)
 
 
-db_ = Posts()
+VISITORS_ID = Sequence('visitors_id_seq', start=1)
+
+
+class Visitors(Base):
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, server_default=VISITORS_ID.next_value())
+    time: Mapped[datetime.datetime | None] = mapped_column(
+        DateTime(timezone=False), server_default=func.now())
+    tg_id: Mapped[int]
+    tg_username: Mapped[str] = mapped_column(nullable=True)
+    tg_fullname: Mapped[str] = mapped_column(nullable=True)
+
+    def create_table(self):
+        self.metadata.create_all(bind=engine)
+
+    def drop_table(self):
+        self.metadata.drop_all(bind=engine)
+
+
+post_table = Posts()
+visitors = Visitors()

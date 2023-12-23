@@ -22,15 +22,12 @@ def date_transform(date: int) -> datetime:
 
 def clear_attachments_path():
     files = [files for _, _, files in os.walk(hv.attach_catalog)]
-    st = []
-    st.append(files)
-    while len(st):
-        l = st.pop()
-        for x in l:
-            if type(x) is list:
-                st.append(x)
+    if len(files[0]) > 0:
+        for path in Path(hv.attach_catalog).iterdir():
+            if path.is_dir():
+                rmtree(path)
             else:
-                print(x)
+                path.unlink()
 
 
 def get_name_by_id(_id: int) -> str:
@@ -139,7 +136,7 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
         videos = att_dict.get('video')
         if videos:
             for video in videos:
-                name = random.randint(1, 20)
+                name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.%(ext)s',
                             'format': '[height<720]'}
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -154,10 +151,11 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
         photos = att_dict.get('photo')
         if photos:
             for photo in photos:
-                name = random.randint(1, 20)
+                name = random.randint(1, 100)
                 with open(f'{hv.attach_catalog}{name}.jpg', 'wb') as fd:
                     for chunk in requests.get(photo).iter_content(100000):
                         fd.write(chunk)
+                        time.sleep(2.4)
                 out_list.append(f'{name}.jpg')
 
         """ Checking DOCS in attachments and downloading """
@@ -172,7 +170,6 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
                 out_list.append(f"{doc.get('title')}.{doc.get('ext')}")
         out_dict = {'to_db_str': ''.join([f'{key.capitalize()}:{len(value)}' for key, value in att_dict.items()]),
                     'out_list': out_list}
-        print(out_dict)
         return out_dict
     return None
 

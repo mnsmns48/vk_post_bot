@@ -1,33 +1,29 @@
 import asyncio
-import os
-import time
-from pathlib import Path
-from shutil import rmtree
 from typing import List
 import requests
 from autoposting.cls import Post
-from autoposting.core import rename_unknown_video_files, clear_attachments_path
-from autoposting.crud import write_post_data, read_post_data
+from autoposting.core import clear_attachments_path
+from autoposting.crud import read_post_data, write_post_data
 from cfg import hv
 
 
-def connect_wall(group_id: int, offset: int) -> List:
+def connect_wall(group_id: int) -> List:
     r = requests.get('https://api.vk.com/method/wall.get',
                      params={
                          'access_token': hv.vk_token,
                          'v': 5.199,
                          'owner_id': group_id,
                          'count': hv.posts_quantity,
-                         'offset': offset,
+                         'offset': hv.posts_offset,
                      })
     return r.json()['response']['items']
 
 
 async def start_autoposting():
-    print('start_autoposting')
+    print('start autoposting')
     while True:
         for group_id in hv.vk_wall_id:
-            volume_posts = connect_wall(group_id=group_id, offset=hv.posts_offset)
+            volume_posts = connect_wall(group_id=group_id)
             volume_posts.reverse()
             for separate in volume_posts:
                 check = read_post_data(post_id=separate.get('id'),
@@ -38,4 +34,4 @@ async def start_autoposting():
                     one_post.send_to_telegram()
                     write_post_data(one_post)
             clear_attachments_path()
-        await asyncio.sleep(100)
+        await asyncio.sleep(120)
