@@ -1,14 +1,9 @@
 import logging
 import sys
 
-from aiogram import Bot, Dispatcher
-
+from bot.bot_vars import bot, dp
 from bot.commands import commands
 from bot.user_handlers import register_user_handlers, user_
-from cfg import hv
-
-bot = Bot(token=hv.bot_token)
-dp = Dispatcher()
 
 
 async def bot_working():

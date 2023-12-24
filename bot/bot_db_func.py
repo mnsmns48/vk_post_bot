@@ -1,5 +1,3 @@
-from datetime import timezone
-
 from aiogram.types import Message
 from sqlalchemy import insert, Sequence
 from sqlalchemy.orm import Session

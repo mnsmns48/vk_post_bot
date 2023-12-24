@@ -7,14 +7,15 @@ from cfg import engine
 
 
 async def main():
+    pass
     # Base.metadata.drop_all(engine)
-    # Base.metadata.create_all(engine)
-    # await bot_working()
-    await start_autoposting()
+    await bot_working()
+    # await start_autoposting()
 
 
 if __name__ == "__main__":
     try:
+        Base.metadata.create_all(engine)
         asyncio.run(main())
     except KeyboardInterrupt:
         print('Script stopped')

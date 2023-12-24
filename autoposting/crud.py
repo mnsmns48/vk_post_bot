@@ -1,11 +1,12 @@
 from functools import wraps
+from msilib import Table
 from typing import Callable
 
-from sqlalchemy import select, insert, Sequence
+from sqlalchemy import select, insert, Sequence, Text, text
 from sqlalchemy.orm import Session
 from collections import Counter
 
-from autoposting.db_models import Posts
+from autoposting.db_models import Posts, People
 from cfg import engine, hv
 
 
@@ -25,7 +26,7 @@ def check_phone_number(number: int) -> int | None:
 def write_post_data(data):
     with Session(engine) as session:
         stmt = insert(Posts).values(
-            id=session.execute(Sequence('posts_id', start=4783)),
+            id=session.execute(Sequence('posts_id_seq')),
             post_id=data.post_id,
             time=data.time,
             group_id=data.group_id,
@@ -70,3 +71,23 @@ def read_post_data(post_id: int, group_id: int, text: str) -> bool:
     if response_text:
         return False
     return True
+
+
+# def data_transfer():
+#     with Session(engine) as session:
+#         stmt = insert(Posts).from_selectvalues(
+#             id=session.execute(Sequence('posts_id_seq')),
+#         ).from_select(signer_id=People.user_id,
+#                       signer_name=People.full_name,
+#                       phone_number=People.phone_number )
+#         session.execute(stmt)
+#         # session.commit()
+
+
+def data_transfer():
+    with Session(engine) as session:
+        select_stmt = select(People.user_id, People.full_name, People.phone_number)
+        insert_stmt = insert(Posts).from_select(
+            ['signer_id', 'signer_name', 'phone_number'], select_stmt)
+        session.execute(insert_stmt)
+        session.commit()
