@@ -40,30 +40,40 @@ async def to_admin(m: Message, state: FSMContext):
 
 
 async def suggest_post(m: Message, state: FSMContext, album: list[Message] = None):
-    txt = 'mg'
-    if m:
-        txt = 'Ты прислал токлько текст'
-        await m.answer(f'{txt}\n{m.text}')
-    if album:
-        txt = m.text if m.text else 'Tы прислал только картинки'
-        media_group: List = list()
-        for msg in album:
-            if msg.photo:
-                file_id = msg.photo[-1].file_id
-            else:
-                obj_dict = msg.dict()
-                file_id = obj_dict[msg.content_type]['file_id']
-            try:
-                if msg == album[0]:
-                    media_group.append(InputMedia(media=file_id,
-                                                  type=msg.content_type,
-                                                  caption=txt))
-                else:
-                    media_group.append(InputMedia(media=file_id,
-                                                  type=msg.content_type))
-            except ValueError:
-                return await m.answer("This type of album is not supported")
-        m.answer_media_group(media_group)
+    print(album.model_dump_json())
+    # for msg in album:
+    #     print(msg.model_dump_json())
+    #     if msg.photo:
+    #         file_id = msg.photo[-1].file_id
+    #     else:
+    #         obj_dict = msg.model_dump_json()
+    #         file_id = obj_dict[msg.content_type]['file_id']
+
+
+    # txt = 'mg'
+    # if m:
+    #     txt = 'Ты прислал токлько текст'
+    #     await m.answer(f'{txt}\n{m.text}')
+    # if album:
+    #     txt = m.text if m.text else 'Tы прислал только картинки'
+    #     media_group: List = list()
+    #     for msg in album:
+    #         if msg.photo:
+    #             file_id = msg.photo[-1].file_id
+    #         else:
+    #             obj_dict = msg.dict()
+    #             file_id = obj_dict[msg.content_type]['file_id']
+    #         try:
+    #             if msg == album[0]:
+    #                 media_group.append(InputMedia(media=file_id,
+    #                                               type=msg.content_type,
+    #                                               caption=txt))
+    #             else:
+    #                 media_group.append(InputMedia(media=file_id,
+    #                                               type=msg.content_type))
+    #         except ValueError:
+    #             return await m.answer("This type of album is not supported")
+    #     await m.answer_media_group(media_group)
     await state.clear()
 
 
