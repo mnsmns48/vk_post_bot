@@ -1,12 +1,9 @@
-import asyncio
-from typing import List
-
 from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, InputMedia
+from aiogram.types import Message, CallbackQuery
 
-from autoposting.middleware import MediaGroupMiddleware
+from bot.middleware import MediaGroupMiddleware
 from bot.bot_db_func import write_user
 from bot.bot_vars import bot
 from bot.fsm import ListenUser
