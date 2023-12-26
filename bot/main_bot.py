@@ -12,7 +12,7 @@ async def bot_working():
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_my_commands(commands)
     try:
-        logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+        # logging.basicConfig(level=logging.INFO, stream=sys.stdout)
         await dp.start_polling(bot)
     finally:
         await bot.session.close()

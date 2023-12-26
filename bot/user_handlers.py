@@ -26,7 +26,9 @@ async def start(m: Message):
 
 async def callback_handler(c: CallbackQuery, state=FSMContext):
     calls = {
-        'suggest': [ListenUser.suggest_state, 'Пиши текст, отправляй вложения'],
+        'suggest': [ListenUser.suggest_state, 'Пиши текст, отправляй вложения\n\n'
+                                              'ВАЖНО!\n'
+                                              'Прислать нужно одним сообщением!'],
         'to_admin': [ListenUser.to_admin, 'АДМИН этого канала готов выслушать все предложения и пожелания']
     }
     await state.set_state(calls.get(c.data)[0])
@@ -40,7 +42,9 @@ async def to_admin(m: Message, state: FSMContext):
 
 
 async def suggest_post(m: Message, state: FSMContext, album: list[Message] = None):
-    print(album.model_dump_json())
+    print('m:', m.content_type)
+    print('album:', album)
+    # print(album.model_dump_json())
     # for msg in album:
     #     print(msg.model_dump_json())
     #     if msg.photo:

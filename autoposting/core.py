@@ -138,7 +138,9 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
             for video in videos:
                 name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.%(ext)s',
-                            'format': '[height<720]'}
+                            # 'format': '[height<720]',
+                            'format': 'worst'
+                            }
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(video)
                     title = ydl.prepare_filename(result)

@@ -33,5 +33,5 @@ async def start_autoposting():
                     one_post = Post(separate)
                     one_post.send_to_telegram()
                     write_post_data(one_post)
-            clear_attachments_path()
+            # clear_attachments_path()
         await asyncio.sleep(120)

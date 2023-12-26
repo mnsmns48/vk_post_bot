@@ -7,7 +7,7 @@ from cfg import engine
 
 
 async def main():
-    pass
+    # pass
     # Base.metadata.drop_all(engine)
     await bot_working()
     # await start_autoposting()
