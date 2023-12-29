@@ -1,7 +1,7 @@
 from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InputMedia
 
 from bot.middleware import MediaGroupMiddleware
 from bot.bot_db_func import write_user
@@ -25,7 +25,11 @@ async def callback_handler(c: CallbackQuery, state=FSMContext):
     calls = {
         'suggest': [ListenUser.suggest_state, 'Пиши текст, отправляй вложения\n\n'
                                               'ВАЖНО!\n'
-                                              'Прислать нужно одним сообщением!'],
+                                              'Прислать нужно одним сообщением!\n\n'
+                                              'Если пост содержит фото и/или видеофайл, сначала добавьте эти файлы, '
+                                              'а текст прикрепите, как подпись к ним\n'
+                                              'Допускается до 10 медиафайлов\n\n'
+                                              'Жду пост....'],
         'to_admin': [ListenUser.to_admin, 'АДМИН этого канала готов выслушать все предложения и пожелания']
     }
     await state.set_state(calls.get(c.data)[0])
@@ -38,9 +42,36 @@ async def to_admin(m: Message, state: FSMContext):
     await state.clear()
 
 
+def picking_attachments(type_content: str, m: Message, album: list[Message] = None):
+    if type_content == 'TEXT':
+        return m.text
+    media_group = list()
+    elif type_content == 'PHOTO'
+        media_group.append(InputMedia(media=m.photo[-1].file_id,
+                                      type=m.content_type,
+                                      caption=m.caption))
+    if type_content == 'VIDEO':
+        media_group.append(InputMedia(media=m.video['file_id'],
+                                      type=m.content_type,
+                                      caption=m.caption))
+
+    print(media_group)
+
 async def suggest_post(m: Message, state: FSMContext, album: list[Message] = None):
-    print('m:', m.content_type)
-    print('album:', album)
+    answer_text = 'Твой пост будет выглядит так:\n'
+    type_s = {'ContentType.PHOTO': picking_attachments(type_content='PHOTO', m=m, album=album),
+              'ContentType.VIDEO': picking_attachments(type_content='VIDEO', m=m, album=album),
+              'ContentType.TEXT': picking_attachments(type_content='TEXT', m=m, album=album)}
+    a = type_s.get(str(m.content_type))
+    # print(a)
+    # print(m.content_type)
+    # print(m.model_dump_json())
+    # if album:
+    #     print('Album True:')
+    #     for i in album:
+    #         print(i.model_dump_json())
+    # else:
+    #     print('album False')
     # print(album.model_dump_json())
     # for msg in album:
     #     print(msg.model_dump_json())
@@ -49,7 +80,6 @@ async def suggest_post(m: Message, state: FSMContext, album: list[Message] = Non
     #     else:
     #         obj_dict = msg.model_dump_json()
     #         file_id = obj_dict[msg.content_type]['file_id']
-
 
     # txt = 'mg'
     # if m:
