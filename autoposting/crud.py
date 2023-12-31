@@ -1,8 +1,7 @@
 from functools import wraps
-from msilib import Table
 from typing import Callable
 
-from sqlalchemy import select, insert, Sequence, Text, text
+from sqlalchemy import select, insert, Sequence, text
 from sqlalchemy.orm import Session
 from collections import Counter
 
