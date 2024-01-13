@@ -139,14 +139,15 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
                 name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.%(ext)s',
                             'format': '[height<720]',
-                            # 'format': 'worst'
+                            #'format': 'worst'
                             }
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(video)
                     title = ydl.prepare_filename(result)
                     if '.unknown_video' in title:
                         os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
-                out_list.append(title.replace('.unknown_video', '.mp4').split('\\')[-1])
+                out_list.append(title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
+                print(out_list)
 
         """ Checking PHOTOS in attachments and downloading """
 
@@ -177,7 +178,7 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
 
 
 def send_media_group(attachments: list, files: list, caption: str | None) -> Response:
-    attachment_files = {f'{item}': open(f'{hv.attach_catalog}/{item}', 'rb')
+    attachment_files = {f'{item}': open(f'{hv.attach_catalog}{item}', 'rb')
                         for item in files}
     if caption:
         attachments[0]['caption'] = caption if len(caption) <= 1024 else caption[:1024]

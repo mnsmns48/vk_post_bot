@@ -72,17 +72,6 @@ def read_post_data(post_id: int, group_id: int, text: str) -> bool:
     return True
 
 
-# def data_transfer():
-#     with Session(engine) as session:
-#         stmt = insert(Posts).from_selectvalues(
-#             id=session.execute(Sequence('posts_id_seq')),
-#         ).from_select(signer_id=People.user_id,
-#                       signer_name=People.full_name,
-#                       phone_number=People.phone_number )
-#         session.execute(stmt)
-#         # session.commit()
-
-
 def data_transfer():
     with Session(engine) as session:
         select_stmt = select(People.user_id, People.full_name, People.phone_number)
