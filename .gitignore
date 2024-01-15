@@ -1,2 +1,7 @@
 /.env
 /venv/
+/systemd/
+/autoposting/attachments/
+/__pycache__/
+/autoposting/__pycache__/
+/bot/__pycache__/
