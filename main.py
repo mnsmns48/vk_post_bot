@@ -1,5 +1,5 @@
 import asyncio
-
+import logging
 from autoposting.crud import data_transfer
 from autoposting.db_models import Base
 from autoposting.start import start_autoposting
@@ -14,9 +14,10 @@ async def main():
     # await bot_working()
     # await asyncio.gather(bot_task, autoposting)
 
+
 if __name__ == "__main__":
     try:
-        Base.metadata.create_all(engine)
+        # Base.metadata.create_all(engine)
         asyncio.run(main())
     except KeyboardInterrupt:
         print('Script stopped')
