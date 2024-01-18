@@ -31,12 +31,11 @@ async def start_autoposting():
             volume_posts = connect_wall(group_id=group_id)
             volume_posts.reverse()
             for separate in volume_posts:
-                logger.debug(f"{separate.get('id')} {separate.get('owner_id')} {separate.get('text')[:20]}")
                 check = read_post_data(post_id=separate.get('id'),
                                        group_id=separate.get('owner_id'),
                                        text=separate.get('text'))
                 if check:
-
+                    logger.debug(f"{separate.get('id')} {separate.get('owner_id')} {separate.get('text')[:20]}")
                     one_post = Post(separate)
                     one_post.send_to_telegram()
                     write_post_data(one_post)
