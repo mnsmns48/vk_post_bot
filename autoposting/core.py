@@ -8,7 +8,7 @@ from shutil import rmtree
 from typing import Any
 import requests
 import tzlocal
-import yt_dlp
+from yt_dlp import YoutubeDL
 import random
 from requests import Response
 from autoposting.crud import check_phone_number
@@ -138,16 +138,20 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
             for video in videos:
                 name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.%(ext)s',
-                            'format': '[height<720]',
-                            #'format': 'worst'
+                            'ie': 'vk',
+                            # 'format': '[height:480]',
+                            'ignoreerrors': 'True'
+                            # 'format': 'worst'
                             }
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                with YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(video)
-                    title = ydl.prepare_filename(result)
-                    if '.unknown_video' in title:
-                        os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
-                out_list.append(title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
-                print(out_list)
+                    if result:
+                        title = ydl.prepare_filename(result)
+                        if '.unknown_video' in title:
+                            os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
+                            out_list.append(
+                                title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
+
 
         """ Checking PHOTOS in attachments and downloading """
 
