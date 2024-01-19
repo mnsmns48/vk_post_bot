@@ -13,6 +13,7 @@ import random
 from requests import Response
 from autoposting.crud import check_phone_number
 from cfg import hv
+from logger_cfg import logger
 
 
 def date_transform(date: int) -> datetime:
@@ -136,12 +137,12 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
         videos = att_dict.get('video')
         if videos:
             for video in videos:
+                print(video)
                 name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.%(ext)s',
                             'ie': 'vk',
-                            # 'format': '[height:480]',
-                            'ignoreerrors': 'True'
-                            # 'format': 'worst'
+                            'format': '[height<=480]/best',
+                            'ignoreerrors': 'True',
                             }
                 with YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(video)
@@ -149,9 +150,10 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
                         title = ydl.prepare_filename(result)
                         if '.unknown_video' in title:
                             os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
-                            out_list.append(
-                                title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
-
+                        out_list.append(
+                            title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
+                    else:
+                        logger.debug('Error loading video')
 
         """ Checking PHOTOS in attachments and downloading """
 
@@ -194,6 +196,7 @@ def send_media_group(attachments: list, files: list, caption: str | None) -> Res
                              params=params,
                              files=attachment_files,
                              timeout=10000)
+    logger.debug(response.status_code)
     return response
 
 
@@ -205,6 +208,7 @@ def send_only_text(text: str) -> Response:
               "disable_notification": hv.notification
               }
     response = requests.post(hv.request_url_blank + '/sendMessage', params=params)
+    logger.debug(response.status_code)
     return response
 
 

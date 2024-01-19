@@ -1,4 +1,6 @@
-logger_config = {
+import logging.config
+
+logger_config_dict = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
@@ -16,7 +18,7 @@ logger_config = {
         'logfile': {
             'class': 'logging.FileHandler',
             'level': 'DEBUG',
-            'filename': 'debug.log',
+            'filename': 'logfile.log',
             'encoding': 'utf-8',
             'mode': 'a',
             'formatter': 'std_format'
@@ -34,3 +36,6 @@ logger_config = {
     'filters': {},
     'root': {}
 }
+
+logging.config.dictConfig(logger_config_dict)
+logger = logging.getLogger('logger')
