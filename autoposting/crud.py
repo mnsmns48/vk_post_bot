@@ -3,10 +3,9 @@ from typing import Callable
 
 from sqlalchemy import select, insert, Sequence, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from collections import Counter
 
-from autoposting.db_models import Posts, People
+from autoposting.db_models import Posts
 from cfg import engine, hv
 
 
