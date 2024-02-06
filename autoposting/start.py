@@ -2,16 +2,17 @@ import asyncio
 from typing import List
 
 import aiohttp
-from autoposting.cls import Post
-from autoposting.core import clear_attachments_path
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from autoposting.cls import Post, clear_attachments_path
 from autoposting.crud import read_post_data, write_post_data
 from autoposting.db_models import Base
-from cfg import hv, engine, async_scoped_session
+from cfg import hv, engine
 from logger_cfg import logger
 
 
 async def connect_wall(group_id: int) -> List:
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
         async with session.get('https://api.vk.com/method/wall.get',
                                params={
                                    'access_token': hv.vk_token,
@@ -19,9 +20,10 @@ async def connect_wall(group_id: int) -> List:
                                    'owner_id': group_id,
                                    'count': hv.posts_quantity,
                                    'offset': hv.posts_offset,
-                               }) as r:
-            response = await r.json()
-    return response['response']['items']
+                               }) as response:
+            if response.status == 200:
+                r = await response.json()
+                return r['response']['items']
 
 
 async def start_autoposting():
@@ -38,8 +40,10 @@ async def start_autoposting():
                                              text=separate.get('text'))
                 if check:
                     logger.debug(f"{separate.get('id')} {separate.get('owner_id')} {separate.get('text')[:20]}")
-                    one_post = Post(separate)
+                    one_post = await Post(separate)
                     await one_post.send_to_telegram()
-                    # write_post_data(one_post)
-            # await clear_attachments_path()
-        await asyncio.sleep(150)
+                    async with AsyncSession(engine) as session:
+                        await write_post_data(data=one_post, session=session)
+            await clear_attachments_path()
+        await asyncio.sleep(120)
+ 
