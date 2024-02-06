@@ -7,12 +7,13 @@ from bot.user_handlers import register_user_handlers, user_
 
 
 async def bot_working():
-    register_user_handlers()
+    await register_user_handlers()
     dp.include_routers(user_)
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_my_commands(commands)
     try:
-        # logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+        print('bot start')
         await dp.start_polling(bot)
     finally:
+        print('bot stop')
         await bot.session.close()

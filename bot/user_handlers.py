@@ -3,13 +3,14 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ContentType
 from aiogram.utils.media_group import MediaGroupBuilder
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.middleware import MediaGroupMiddleware
 from bot.bot_db_func import write_user
 from bot.bot_vars import bot
 from bot.fsm import ListenUser
 from bot.keyboards import main_kb, public
-from cfg import hv
+from cfg import hv, engine
 
 user_ = Router()
 user_.message.middleware(MediaGroupMiddleware())
@@ -24,7 +25,8 @@ def receive_attach(album: MediaGroupBuilder, m: Message) -> MediaGroupBuilder:
 
 
 async def start(m: Message):
-    write_user(m)
+    async with AsyncSession(engine) as session:
+        await write_user(m, session)
     await m.answer_photo(photo='AgACAgIAAxkBAAITZmQlo77a9vGGy1DlE30EBC652E9-AAIyxjEbbWMpSZgCRTKnxt4VAQADAgADeQADLwQ',
                          caption='Этот бот принимает посты в телеграм канал @leninocremia\n'
                                  'Нажимаем кнопочки под этим текстом\n',
@@ -96,7 +98,7 @@ async def callback_handler_again(c: CallbackQuery, state=FSMContext):
     await state.clear()
 
 
-def register_user_handlers():
+async def register_user_handlers():
     user_.message.register(start, CommandStart())
     user_.callback_query.register(suggest_post_callback, F.data == 'suggest')
     user_.callback_query.register(to_admin_callback, F.data == 'to_admin')

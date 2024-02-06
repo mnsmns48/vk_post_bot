@@ -1,12 +1,14 @@
+import asyncio
 from functools import wraps
 from typing import Callable
 
 from sqlalchemy import select, insert, Sequence, text
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from collections import Counter
 
 from autoposting.db_models import Posts, People
-from cfg import engine, hv
+from cfg import engine, hv, async_session
 
 
 def check_phone_number(number: int) -> int | None:
@@ -57,17 +59,17 @@ def post_filter(func: Callable) -> Callable:
 
 
 @post_filter
-def read_post_data(post_id: int, group_id: int, text: str) -> bool:
-    with Session(engine) as session:
+async def read_post_data(post_id: int, group_id: int, text: str) -> bool:
+    async with AsyncSession(engine) as session:
         query = select(Posts.post_id, Posts.group_id) \
             .filter(Posts.post_id == post_id, Posts.group_id == group_id)
-        response = session.execute(query).fetchone()
-    if response == (post_id, group_id):
+        response = await session.execute(query)
+    if response.fetchone() == (post_id, group_id):
         return False
-    with Session(engine) as session:
+    async with AsyncSession(engine) as session:
         query = select(Posts.text).filter(Posts.text == text)
-        response_text = session.execute(query).fetchone()
-    if response_text:
+        response_text = await session.execute(query)
+    if response_text.fetchone():
         return False
     return True
 

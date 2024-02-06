@@ -1,11 +1,14 @@
+from aiogram.types import FSInputFile
+from aiogram.utils.media_group import MediaGroupBuilder
+
 from autoposting.core import \
     get_name_by_id, \
     get_contact, \
     de_anonymization, \
     get_attachments, \
-    send_media_group, \
-    send_only_text, \
     date_transform
+from bot.bot_vars import bot
+from cfg import hv
 
 
 class Post:
@@ -27,7 +30,7 @@ class Post:
         self.attachments = get_attachments(data, repost=self.repost)
         self.source = f"https://vk.com/wall{data.get('from_id')}_{data.get('id')}"
 
-    def caption_preparation(self) -> str | None:
+    async def caption_preparation(self) -> str | None:
         caption = self.text
         if self.repost:
             repost_place = 'public' if self.repost_place_id < 0 else 'id'
@@ -40,8 +43,8 @@ class Post:
             caption = caption + '\n<i>          Платная реклама</i>\n'
         return caption
 
-    def send_to_telegram(self):
-        caption = self.caption_preparation()
+    async def send_to_telegram(self):
+        caption = await self.caption_preparation()
         if self.attachments:
             files = self.attachments.get('out_list')
             ext_s = {
@@ -62,28 +65,32 @@ class Post:
                 'mp3': 'audio',
                 'aac': 'audio'
             }
-            files_dict = dict()
+            media_group = MediaGroupBuilder()
             for file in files:
-                ext = file.split('.')[-1]
-                files_dict[file] = ext_s.get(ext)
-            list_attach = list()
-            list_attach_docs = list()
-            for key, value in files_dict.items():
-                if value != 'document':
-                    list_attach.append({
-                        'type': value, 'media': f"attach://{key}", 'parse_mode': 'HTML'
-                    })
-                if value == 'document' or value == 'audio':
-                    list_attach_docs.append({
-                        'type': value, 'media': f"attach://{key}", 'parse_mode': 'HTML'
-                    })
-            if list_attach:
-                if len(caption) < 1024:
-                    send_media_group(attachments=list_attach, files=files, caption=caption)
-                else:
-                    send_media_group(attachments=list_attach, files=files, caption=None)
-                    send_only_text(text=caption)
-            if list_attach_docs:
-                send_media_group(attachments=list_attach_docs, files=files, caption=None)
+                media_group.add(type=str(ext_s.get(file.split('.')[-1])),
+                                media=FSInputFile(f"{hv.attach_catalog}{file}"),
+                                parse_mode='HTML'
+                                )
+            if len(caption) < 1024:
+                media_group.caption = caption
+                await bot.send_media_group(chat_id=hv.tg_chat_id,
+                                           media=media_group.build(),
+                                           disable_notification=hv.notification,
+                                           request_timeout=1000)
+            else:
+                await bot.send_media_group(chat_id=hv.tg_chat_id,
+                                           media=media_group.build(),
+                                           disable_notification=hv.notification,
+                                           request_timeout=1000)
+                await bot.send_message(chat_id=hv.tg_chat_id,
+                                       text=caption,
+                                       parse_mode='HTML',
+                                       disable_web_page_preview=True,
+                                       disable_notification=hv.notification)
         else:
-            send_only_text(text=caption)
+            await bot.send_message(chat_id=hv.tg_chat_id,
+                                   text=caption,
+                                   parse_mode='HTML',
+                                   disable_web_page_preview=True,
+                                   disable_notification=hv.notification
+                                   )

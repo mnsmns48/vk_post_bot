@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import re
@@ -6,12 +7,16 @@ from datetime import datetime
 from pathlib import Path
 from shutil import rmtree
 from typing import Any
+
+import aiohttp
 import requests
 import tzlocal
+from aiohttp import ClientResponse
 from yt_dlp import YoutubeDL
 import random
 from requests import Response
 from autoposting.crud import check_phone_number
+from bot.bot_vars import bot
 from cfg import hv
 from logger_cfg import logger
 
@@ -21,7 +26,7 @@ def date_transform(date: int) -> datetime:
     return datetime.fromtimestamp(date, local_timezone).replace(tzinfo=None)
 
 
-def clear_attachments_path():
+async def clear_attachments_path():
     files = [files for _, _, files in os.walk(hv.attach_catalog)]
     if len(files[0]) > 0:
         for path in Path(hv.attach_catalog).iterdir():
@@ -29,6 +34,7 @@ def clear_attachments_path():
                 rmtree(path)
             else:
                 path.unlink()
+    await asyncio.sleep(1)
 
 
 def get_name_by_id(_id: int) -> str:
@@ -180,36 +186,8 @@ def get_attachments(data: dict, repost: bool) -> dict | None:
         out_dict = {'to_db_str': ''.join([f'{key.capitalize()}:{len(value)}' for key, value in att_dict.items()]),
                     'out_list': out_list}
         return out_dict
+
     return None
-
-
-def send_media_group(attachments: list, files: list, caption: str | None) -> Response:
-    attachment_files = {f'{item}': open(f'{hv.attach_catalog}{item}', 'rb')
-                        for item in files}
-    if caption:
-        attachments[0]['caption'] = caption if len(caption) <= 1024 else caption[:1024]
-    media = json.dumps(attachments)
-    params = {"chat_id": hv.tg_chat_id,
-              'media': media,
-              "disable_notification": hv.notification}
-    response = requests.post(hv.request_url_blank + '/sendMediaGroup',
-                             params=params,
-                             files=attachment_files,
-                             timeout=10000)
-    logger.debug(response.status_code)
-    return response
-
-
-def send_only_text(text: str) -> Response:
-    params = {"chat_id": hv.tg_chat_id,
-              "text": text,
-              "parse_mode": 'HTML',
-              "disable_web_page_preview": True,
-              "disable_notification": hv.notification
-              }
-    response = requests.post(hv.request_url_blank + '/sendMessage', params=params)
-    logger.debug(response.status_code)
-    return response
 
 
 """ Attachments Dependencies """

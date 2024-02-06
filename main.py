@@ -9,15 +9,13 @@ from cfg import engine
 
 async def main():
     # data_transfer()
-    # bot_task = asyncio.create_task(bot_working())
-    await start_autoposting()
-    # await bot_working()
-    # await asyncio.gather(bot_task, autoposting)
+    bot_task = asyncio.create_task(bot_working())
+    autopost = asyncio.create_task(start_autoposting())
+    await asyncio.gather(bot_task, autopost)
 
 
 if __name__ == "__main__":
     try:
-        # Base.metadata.create_all(engine)
         asyncio.run(main())
     except KeyboardInterrupt:
         print('Script stopped')

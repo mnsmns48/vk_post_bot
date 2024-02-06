@@ -1,7 +1,9 @@
+from asyncio import current_task
 from dataclasses import dataclass
 from environs import Env
 from pydantic.v1 import BaseSettings
-from sqlalchemy import create_engine
+from sqlalchemy import NullPool
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession, async_scoped_session
 
 
 @dataclass
@@ -53,12 +55,18 @@ hv = load_hidden_vars(path='.env')
 
 class CoreConfig(BaseSettings):
     base: str = (
-        f"postgresql+psycopg://{hv.db_username}:{hv.db_password}"
+        f"postgresql+asyncpg://{hv.db_username}:{hv.db_password}"
         f"@localhost:{hv.db_local_port}/{hv.db_name}"
     )
     db_echo: bool = False
 
 
 dbconfig = CoreConfig()
-engine = create_engine(url=dbconfig.base,
-                       echo=dbconfig.db_echo)
+engine = create_async_engine(url=dbconfig.base,
+                             echo=dbconfig.db_echo,
+                             poolclass=NullPool)
+async_session = async_sessionmaker(bind=engine,
+                                   autocommit=False,
+                                   expire_on_commit=False)
+async_scoped_session = async_scoped_session(session_factory=async_session,
+                                            scopefunc=current_task)
