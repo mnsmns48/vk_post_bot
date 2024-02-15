@@ -47,12 +47,11 @@ async def write_post_data(data, session: AsyncSession):
 def post_filter(func: Callable) -> Callable:
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        response = func(*args, **kwargs)
+        response = await func(*args, **kwargs)
         for filter_one_word in hv.filter_words:
             if filter_one_word in kwargs.get('text'):
                 response = False
         return response
-
     return wrapper
 
 
@@ -69,7 +68,6 @@ async def read_post_data(post_id: int, group_id: int, text: str) -> bool:
         response_text = await session.execute(query)
     if response_text.fetchone():
         return False
-    await asyncio.sleep(0.1)
     return True
 
 # def data_transfer():
