@@ -1,3 +1,4 @@
+import asyncio
 from functools import wraps
 from typing import Callable
 
@@ -45,7 +46,7 @@ async def write_post_data(data, session: AsyncSession):
 
 def post_filter(func: Callable) -> Callable:
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         response = func(*args, **kwargs)
         for filter_one_word in hv.filter_words:
             if filter_one_word in kwargs.get('text'):
@@ -68,8 +69,8 @@ async def read_post_data(post_id: int, group_id: int, text: str) -> bool:
         response_text = await session.execute(query)
     if response_text.fetchone():
         return False
+    await asyncio.sleep(0.1)
     return True
-
 
 # def data_transfer():
 #     with Session(engine) as session:
