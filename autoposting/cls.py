@@ -119,13 +119,13 @@ class Post:
                                            disable_notification=hv.notification,
                                            request_timeout=1000)
                 await bot.send_message(chat_id=hv.tg_chat_id,
-                                       text=caption,
+                                       text=caption[:4096],
                                        parse_mode='HTML',
                                        disable_web_page_preview=True,
                                        disable_notification=hv.notification)
         else:
             await bot.send_message(chat_id=hv.tg_chat_id,
-                                   text=caption,
+                                   text=caption[:4096],
                                    parse_mode='HTML',
                                    disable_web_page_preview=True,
                                    disable_notification=hv.notification
