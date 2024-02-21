@@ -18,9 +18,9 @@ user_.message.middleware(MediaGroupMiddleware())
 
 def receive_attach(album: MediaGroupBuilder, m: Message) -> MediaGroupBuilder:
     if m.content_type == ContentType.PHOTO:
-        album.add_photo(m.photo[-1].file_id)
+        album.add_photo(m.photo[-1].file_id, parse_mode='MarkdownV2')
     if m.content_type == ContentType.VIDEO:
-        album.add_video(m.video.file_id)
+        album.add_video(m.video.file_id, parse_mode='MarkdownV2')
     return album
 
 
@@ -53,8 +53,8 @@ async def to_admin_callback(c: CallbackQuery, state=FSMContext):
 
 
 async def to_admin(m: Message, state: FSMContext):
-    text = f'Сообщение админу\nОт {m.from_user.full_name} {m.from_user.username}\n{m.text}'
-    await bot.send_message(chat_id=hv.tg_bot_admin_id[0], text=text)
+    text = (f'Сообщение админу:\n\nАвтор: [{m.from_user.full_name}](tg://user?id={m.from_user.id})\n\n{m.text}')
+    await bot.send_message(chat_id=hv.tg_bot_admin_id[0], text=text, parse_mode='MarkdownV2')
     await m.answer('Сообщение админу отправлено\n'
                    'Он скоро прочтёт его. До свидания', reply_markup=main_kb.as_markup())
     await state.clear()
@@ -63,12 +63,12 @@ async def to_admin(m: Message, state: FSMContext):
 async def suggest_post(m: Message, state: FSMContext, album: list[Message] = None) -> Message:
     answer_text = 'Твой пост будет выглядит так:\n'
     if m.content_type == ContentType.TEXT:
-        text_line = f"{m.text}\n\n{m.from_user.full_name}\n@{m.from_user.username}"
-        await m.answer(f"{answer_text}\n\n{text_line}")
+        text_line = f"{m.text}\n\nАвтор: [{m.from_user.full_name}](tg://user?id={m.from_user.id})"
+        await m.answer(text=f"{answer_text}\n\n{text_line}", parse_mode='MarkdownV2')
         await state.update_data(only_text=text_line)
         return await m.answer("Публикуем? Ожидаю ответ...", reply_markup=public.as_markup())
     album_builder = MediaGroupBuilder(
-        caption=f"{m.caption}\n\n{m.from_user.full_name}\n@{m.from_user.username}"
+        caption=f"{m.caption}\n\nАвтор: [{m.from_user.full_name}](tg://user?id={m.from_user.id})"
     )
     response = receive_attach(album=album_builder, m=m)
     if album:
@@ -85,7 +85,8 @@ async def callback_handler_public(c: CallbackQuery, state=FSMContext):
     data_in_state = await state.get_data()
     await bot.send_message(chat_id=hv.tg_bot_admin_id[0], text='!!!!!!!!!!Пост!!!!!!\n')
     if data_in_state.get('only_text'):
-        await bot.send_message(chat_id=hv.tg_bot_admin_id[0], text=data_in_state.get('only_text'))
+        await bot.send_message(chat_id=hv.tg_bot_admin_id[0],
+                               text=data_in_state.get('only_text'), parse_mode='MarkdownV2')
     else:
         await bot.send_media_group(chat_id=hv.tg_bot_admin_id[0], media=data_in_state.get('media_group').build())
     await c.message.answer('Отправлено. Ожидайте публикации')
