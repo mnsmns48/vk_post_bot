@@ -65,7 +65,7 @@ class Post:
         return "[initialization done and successful]"
 
     async def caption_preparation(self) -> str | None:
-        caption = self.text
+        caption = self.text.replace('>', ' ').replace('<', ' ')
         if self.repost:
             repost_place = 'public' if self.repost_place_id < 0 else 'id'
             repost = f"<b> → → → → Р Е П О С Т ↓ ↓ ↓ ↓</b>\n" \
