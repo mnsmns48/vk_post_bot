@@ -1,7 +1,7 @@
 from aiogram.types import Message
 from sqlalchemy import insert, Sequence, select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from datetime import datetime
 from autoposting.db_models import Visitors
 
 
@@ -20,5 +20,7 @@ async def last_guests(session: AsyncSession) -> str:
     query = select(Visitors).order_by(Visitors.time.desc()).limit(10)
     r: Result = await session.execute(query)
     guests = r.scalars().all()
+    result = str()
     for line in guests:
-        print(line.time[5:15], line.tg_id, line.tg_username, line.tg_fullname)
+        result += f"{line.time.strftime('%d-%m-%Y %H:%M')} {line.tg_id} {line.tg_username} {line.tg_fullname}\n"
+    return result

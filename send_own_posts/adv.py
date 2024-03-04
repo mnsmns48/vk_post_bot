@@ -13,4 +13,7 @@ async def dobrotsen_adv():
         callback_data='dobrotsen_go')
     )
 
-    await bot.send_message(chat_id=-1001819403719, text='↓', reply_markup=dobrotsen_kb.as_markup())
+    await bot.send_photo(chat_id=-1001819403719,
+                         photo='AgACAgIAAxkBAAIkbmXl7qS83ahNFL8TN9aTJvhfdiwkAAJo1TEbTEcwS3lDW3Qfwu-7AQADAgADbQADNAQ',
+                         caption=' ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓',
+                         reply_markup=dobrotsen_kb.as_markup())

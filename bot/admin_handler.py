@@ -24,10 +24,11 @@ async def upload_pic(m: Message):
 async def show_guests(m: Message):
     async with engine.scoped_session() as session:
         answer = await last_guests(session=session)
-    # await m.answer(text=answer)
+    await m.answer(text=answer)
 
 
 async def register_admin_handlers():
     admin_.message.filter(AdminFilter())
     admin_.message.register(start, CommandStart())
+    admin_.message.register(upload_pic, F.photo)
     admin_.message.register(show_guests, F.text == "Последние гости")
