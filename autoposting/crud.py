@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from collections import Counter
 
 from autoposting.db_models import Posts
-from cfg import engine, hv
+from cfg_and_engine import engine, hv
 
 
 async def check_phone_number(number: int, session: AsyncSession) -> str | None:
@@ -52,28 +52,21 @@ def post_filter(func: Callable) -> Callable:
             if filter_one_word in kwargs.get('text'):
                 response = False
         return response
+
     return wrapper
 
 
 @post_filter
 async def read_post_data(post_id: int, group_id: int, text: str) -> bool:
-    async with AsyncSession(engine) as session:
+    async with engine.scoped_session() as session:
         query = select(Posts.post_id, Posts.group_id) \
             .filter(Posts.post_id == post_id, Posts.group_id == group_id)
         response = await session.execute(query)
     if response.fetchone() == (post_id, group_id):
         return False
-    async with AsyncSession(engine) as session:
+    async with engine.scoped_session() as session:
         query = select(Posts.text).filter(Posts.text == text)
         response_text = await session.execute(query)
     if response_text.fetchone():
         return False
     return True
-
-# def data_transfer():
-#     with Session(engine) as session:
-#         select_stmt = select(People.user_id, People.full_name, People.phone_number)
-#         insert_stmt = insert(Posts).from_select(
-#             ['signer_id', 'signer_name', 'phone_number'], select_stmt)
-#         session.execute(insert_stmt)
-#         session.commit()

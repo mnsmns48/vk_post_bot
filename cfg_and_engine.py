@@ -1,9 +1,10 @@
 from asyncio import current_task
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from environs import Env
 from pydantic.v1 import BaseSettings
 from sqlalchemy import NullPool
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, async_scoped_session
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, async_scoped_session, AsyncSession
 
 
 @dataclass
@@ -24,6 +25,7 @@ class Hidden:
     attach_catalog: str
     request_url_blank: str
     filter_words: list[str]
+    dobrotsen_db_name: str
 
 
 def load_hidden_vars(path: str):
@@ -47,6 +49,7 @@ def load_hidden_vars(path: str):
         attach_catalog=env.str("ATTACH_CATALOG"),
         request_url_blank=env.str("REQUEST_URL_BLANK") + env.str("BOT_TOKEN"),
         filter_words=list(env.str("FILTER_WORDS").split(',')),
+        dobrotsen_db_name=env.str("DOBROTSEN_DB_NAME")
     )
 
 
@@ -62,6 +65,33 @@ class CoreConfig(BaseSettings):
 
 
 dbconfig = CoreConfig()
-engine = create_async_engine(url=dbconfig.base,
-                             echo=dbconfig.db_echo,
-                             poolclass=NullPool)
+
+
+class AsyncDataBase:
+    def __init__(self, url: str, echo: bool = False):
+        self.engine = create_async_engine(
+            url=url.replace('driver', 'asyncpg'),
+            echo=echo,
+            poolclass=NullPool
+        )
+        self.session_factory = async_sessionmaker(
+            bind=self.engine,
+            autoflush=False,
+            autocommit=False,
+            expire_on_commit=False,
+        )
+
+    @asynccontextmanager
+    async def scoped_session(self) -> AsyncSession:
+        session = async_scoped_session(
+            session_factory=self.session_factory,
+            scopefunc=current_task,
+        )
+        try:
+            async with session() as s:
+                yield s
+        finally:
+            await session.remove()
+
+
+engine = AsyncDataBase(dbconfig.base, dbconfig.db_echo)

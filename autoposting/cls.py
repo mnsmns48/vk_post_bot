@@ -17,7 +17,7 @@ from yt_dlp import YoutubeDL
 
 from autoposting.crud import check_phone_number
 from bot.bot_vars import bot
-from cfg import hv, engine
+from cfg_and_engine import hv, engine
 from logger_cfg import logger
 
 
@@ -178,7 +178,7 @@ async def get_attachments(data: dict, repost: bool) -> dict | None:
                 name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.%(ext)s',
                             'ie': 'vk',
-                            'format': '[height<=480]/best',
+                            # 'format': '[height<=480]/best',
                             'ignoreerrors': 'True',
                             }
                 with YoutubeDL(ydl_opts) as ydl:
@@ -294,7 +294,7 @@ async def de_anonymization(data: dict, is_repost: bool, phone_number: int | None
     elif isinstance(signer_id, int) and phone_number is None:
         return signer_id
     elif signer_id is None and phone_number:
-        async with AsyncSession(engine) as session:
+        async with engine.scoped_session() as session:
             find_signer_in_db = await check_phone_number(number=phone_number, session=session)
         if find_signer_in_db:
             return find_signer_in_db

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from autoposting.cls import Post, clear_attachments_path
 from autoposting.crud import read_post_data, write_post_data
 from autoposting.db_models import Base
-from cfg import hv, engine
+from cfg_and_engine import hv, engine
 from logger_cfg import logger
 
 
@@ -27,7 +27,7 @@ async def connect_wall(group_id: int) -> List:
 
 
 async def start_autoposting():
-    async with engine.begin() as as_session:
+    async with engine.engine.begin() as as_session:
         await as_session.run_sync(Base.metadata.create_all)
     print('start autoposting')
     while True:
@@ -42,8 +42,7 @@ async def start_autoposting():
                     logger.debug(f"{separate.get('id')} {separate.get('owner_id')} {separate.get('text')[:20]}")
                     one_post = await Post(separate)
                     await one_post.send_to_telegram()
-                    async with AsyncSession(engine) as session:
+                    async with engine.scoped_session() as session:
                         await write_post_data(data=one_post, session=session)
             await clear_attachments_path()
-        await asyncio.sleep(120)
- 
+        await asyncio.sleep(100)
