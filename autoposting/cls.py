@@ -176,17 +176,15 @@ async def get_attachments(data: dict, repost: bool) -> dict | None:
         if videos:
             for video in videos:
                 name = random.randint(1, 100)
-                ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.%(ext)s',
-                            'ie': 'vk',
-                            # 'format': '[height<=480]/best',
-                            'ignoreerrors': 'True',
+                ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.mp4',
+                            'format': '[height<=480]/best',
                             }
                 with YoutubeDL(ydl_opts) as ydl:
                     result = ydl.extract_info(video)
                     if result:
                         title = ydl.prepare_filename(result)
-                        if '.unknown_video' in title:
-                            os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
+                        # if '.unknown_video' in title:
+                        #     os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
                         out_list.append(
                             title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
                     else:
