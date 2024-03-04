@@ -177,6 +177,8 @@ async def get_attachments(data: dict, repost: bool) -> dict | None:
             for video in videos:
                 name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.mp4',
+                            'ffmpeg-location': '/usr/bin/ffmpeg',
+
                             'format': '[height<=480]/best',
                             }
                 with YoutubeDL(ydl_opts) as ydl:
