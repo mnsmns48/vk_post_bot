@@ -15,7 +15,7 @@ from aiogram.utils.media_group import MediaGroupBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 from yt_dlp import YoutubeDL
 
-from autoposting.crud import check_phone_number
+from crud import check_phone_number
 from bot.bot_vars import bot
 from cfg_and_engine import hv, engine
 from logger_cfg import logger

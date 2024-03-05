@@ -6,7 +6,7 @@ from sqlalchemy import select, insert, Sequence, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from collections import Counter
 
-from autoposting.db_models import Posts
+from db_models import Posts
 from cfg_and_engine import engine, hv
 
 
