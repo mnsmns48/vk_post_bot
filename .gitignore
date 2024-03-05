@@ -1,4 +1,4 @@
-/config/.env
+/.env
 /venv/
 /systemd/
 /autoposting/attachments/

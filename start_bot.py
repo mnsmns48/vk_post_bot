@@ -5,7 +5,7 @@ from bot.admin_handler import register_admin_handlers, admin_
 from bot.bot_vars import bot, dp
 from bot.commands import commands
 from bot.user_handlers import register_user_handlers, user_
-from config.cfg_and_engine import engine
+from cfg_and_engine import engine
 from send_own_posts.adv import dbt, register_dbt_handlers
 
 

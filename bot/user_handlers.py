@@ -10,7 +10,7 @@ from bot.bot_db_func import write_user
 from bot.bot_vars import bot
 from bot.fsm import ListenUser
 from bot.user_keyboards import main_kb, public
-from config.cfg_and_engine import hv, engine
+from cfg_and_engine import hv, engine
 from send_own_posts.adv import dobrotsen_kb
 
 user_ = Router()

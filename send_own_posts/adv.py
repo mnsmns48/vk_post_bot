@@ -4,7 +4,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from sqlalchemy import select, Result, and_
 
 from bot.bot_vars import bot
-from config.cfg_and_engine import dobro_engine
+from cfg_and_engine import dobro_engine
 from send_own_posts.models import Dobrotsen
 
 dbt = Router()
