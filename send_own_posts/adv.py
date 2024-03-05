@@ -64,7 +64,7 @@ async def walking_dirs(m: Message):
     if answer.get('error') is True:
         kb = await main_kb()
         await m.answer(f'Нет товаров в категории - {m.text}', reply_markup=kb.as_markup(resize_keyboard=True,
-                                                                                           is_persistent=True))
+                                                                                        is_persistent=True))
     else:
         if answer.get('end'):
             dbt2_ik = InlineKeyboardBuilder()
@@ -92,9 +92,12 @@ async def show_product(c: CallbackQuery):
     async with dobro_engine.scoped_session() as session:
         r: Result = await session.execute(query)
         result = r.scalars().one()
-    await bot.send_photo(chat_id=c.from_user.id,
-                         photo=result.image,
-                         caption=f"{result.title}\n{result.price} руб.")
+    if result.image != 'https://dobrotsen.ru/local/templates/main_new/images/nophoto_182.png':
+        await bot.send_photo(chat_id=c.from_user.id,
+                             photo=result.image,
+                             caption=f"{result.title}\n{result.price} руб.")
+    else:
+        await c.message.answer(text=f"Картинки пока нет\n\n{result.title}\n{result.price} руб.")
 
 
 async def register_dbt_handlers():
