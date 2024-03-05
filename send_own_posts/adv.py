@@ -1,10 +1,10 @@
 from aiogram import Router, F
-from aiogram.types import InlineKeyboardButton, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup, Message
+from aiogram.types import InlineKeyboardButton, CallbackQuery, KeyboardButton, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from sqlalchemy import select, Result, and_
 
 from bot.bot_vars import bot
-from cfg_and_engine import dobro_engine
+from config.cfg_and_engine import dobro_engine
 from send_own_posts.models import Dobrotsen
 
 dbt = Router()

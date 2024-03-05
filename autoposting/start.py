@@ -5,8 +5,8 @@ import aiohttp
 from cls import Post, clear_attachments_path
 from crud import read_post_data, write_post_data
 from db_models import Base
-from cfg_and_engine import hv, engine
-from logger_cfg import logger
+from config.cfg_and_engine import hv, engine
+from config.logger_cfg import logger
 
 
 async def connect_wall(group_id: int) -> List:

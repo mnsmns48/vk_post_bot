@@ -4,7 +4,7 @@ from aiogram.types import Message
 
 from bot.admin_keyboards import main_admin
 from bot.bot_db_func import last_guests
-from cfg_and_engine import engine
+from config.cfg_and_engine import engine
 
 from bot.filter import AdminFilter
 

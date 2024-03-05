@@ -12,13 +12,12 @@ import requests
 import tzlocal
 from aiogram.types import FSInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
-from sqlalchemy.ext.asyncio import AsyncSession
 from yt_dlp import YoutubeDL
 
 from crud import check_phone_number
 from bot.bot_vars import bot
-from cfg_and_engine import hv, engine
-from logger_cfg import logger
+from config.cfg_and_engine import hv, engine
+from config.logger_cfg import logger
 
 
 class Post:

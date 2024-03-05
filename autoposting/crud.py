@@ -1,4 +1,3 @@
-import asyncio
 from functools import wraps
 from typing import Callable
 
@@ -7,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from collections import Counter
 
 from db_models import Posts
-from cfg_and_engine import engine, hv
+from config.cfg_and_engine import engine, hv
 
 
 async def check_phone_number(number: int, session: AsyncSession) -> str | None:
