@@ -63,7 +63,7 @@ async def walking_dirs(m: Message):
     answer = await get_dirs(title=m.text)
     if answer.get('error') is True:
         kb = await main_kb()
-        await m.answer(f'Нет товаров в этой категории {m.text}', reply_markup=kb.as_markup(resize_keyboard=True,
+        await m.answer(f'Нет товаров в категории - {m.text}', reply_markup=kb.as_markup(resize_keyboard=True,
                                                                                            is_persistent=True))
     else:
         if answer.get('end'):
