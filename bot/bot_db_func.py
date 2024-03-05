@@ -1,7 +1,6 @@
 from aiogram.types import Message
 from sqlalchemy import insert, Sequence, select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
 from autoposting.db_models import Visitors
 
 

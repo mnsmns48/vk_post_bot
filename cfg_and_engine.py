@@ -2,7 +2,6 @@ from asyncio import current_task
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from environs import Env
-from pydantic.v1 import BaseSettings
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, async_scoped_session, AsyncSession
 
@@ -21,7 +20,7 @@ class Hidden:
     db_username: str
     db_password: str
     db_local_port: int
-    db_name: str
+    main_db_name: str
     attach_catalog: str
     request_url_blank: str
     filter_words: list[str]
@@ -45,7 +44,7 @@ def load_hidden_vars(path: str):
         db_username=env.str("DB_USERNAME"),
         db_password=env.str("DB_PASSWORD"),
         db_local_port=env.int("DB_LOCAL_PORT"),
-        db_name=env.str("DB_NAME"),
+        main_db_name=env.str("DB_NAME"),
         attach_catalog=env.str("ATTACH_CATALOG"),
         request_url_blank=env.str("REQUEST_URL_BLANK") + env.str("BOT_TOKEN"),
         filter_words=list(env.str("FILTER_WORDS").split(',')),
@@ -56,15 +55,18 @@ def load_hidden_vars(path: str):
 hv = load_hidden_vars(path='.env')
 
 
-class CoreConfig(BaseSettings):
-    base: str = (
-        f"postgresql+asyncpg://{hv.db_username}:{hv.db_password}"
-        f"@localhost:{hv.db_local_port}/{hv.db_name}"
-    )
-    db_echo: bool = False
+class CoreConfig():
+    def __init__(self, db):
+        self.db = db
+        self.base: str = (
+            f"postgresql+asyncpg://{hv.db_username}:{hv.db_password}"
+            f"@localhost:{hv.db_local_port}/{db}"
+        )
+        self.db_echo: bool = False
 
 
-dbconfig = CoreConfig()
+dbconfig = CoreConfig(db=hv.main_db_name)
+dobrotsen_config = CoreConfig(db=hv.dobrotsen_db_name)
 
 
 class AsyncDataBase:
@@ -95,3 +97,4 @@ class AsyncDataBase:
 
 
 engine = AsyncDataBase(dbconfig.base, dbconfig.db_echo)
+dobro_engine = AsyncDataBase(dobrotsen_config.base, dobrotsen_config.db_echo)

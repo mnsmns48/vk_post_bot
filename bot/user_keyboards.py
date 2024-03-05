@@ -11,8 +11,6 @@ main_kb.add(InlineKeyboardButton(
     callback_data='to_admin')
 )
 
-
-
 public = InlineKeyboardBuilder()
 public.add(InlineKeyboardButton(
     text='Изменить пост🛠️',

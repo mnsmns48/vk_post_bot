@@ -5,14 +5,13 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ContentType
 from aiogram.utils.media_group import MediaGroupBuilder
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from bot.middleware import MediaGroupMiddleware
 from bot.bot_db_func import write_user
 from bot.bot_vars import bot
 from bot.fsm import ListenUser
 from bot.user_keyboards import main_kb, public
 from cfg_and_engine import hv, engine
+from send_own_posts.adv import dobrotsen_kb
 
 user_ = Router()
 user_.message.middleware(MediaGroupMiddleware())
@@ -31,9 +30,12 @@ async def start(m: Message):
         await write_user(m, session)
     await m.answer_photo(photo='AgACAgIAAxkBAAITZmQlo77a9vGGy1DlE30EBC652E9-AAIyxjEbbWMpSZgCRTKnxt4VAQADAgADeQADLwQ',
                          caption='Этот бот принимает посты в телеграм канал @leninocremia\n'
-                                 'Нажимаем кнопочки под этим текстом\n',
+                                 'А так же показывает цены',
                          reply_markup=main_kb.as_markup())
-
+    await asyncio.sleep(0.5)
+    await m.answer_photo(photo='AgACAgIAAxkBAAIkbmXl7qS83ahNFL8TN9aTJvhfdiwkAAJo1TEbTEcwS3lDW3Qfwu-7AQADAgADbQADNAQ',
+                         caption='↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓',
+                         reply_markup=dobrotsen_kb.as_markup())
 
 
 async def suggest_post_callback(c: CallbackQuery, state=FSMContext):
@@ -115,4 +117,3 @@ async def register_user_handlers():
     user_.message.register(suggest_post, ListenUser.suggest_)
     user_.callback_query.register(callback_handler_public, F.data == 'public')
     user_.callback_query.register(callback_handler_again, F.data == 'again')
-    user_.callback_query.register(test, F.data == 'dobrotsen_go')

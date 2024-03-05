@@ -2,8 +2,6 @@ import asyncio
 from typing import List
 
 import aiohttp
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from autoposting.cls import Post, clear_attachments_path
 from autoposting.crud import read_post_data, write_post_data
 from autoposting.db_models import Base
@@ -12,7 +10,7 @@ from logger_cfg import logger
 
 
 async def connect_wall(group_id: int) -> List:
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
         async with session.get('https://api.vk.com/method/wall.get',
                                params={
                                    'access_token': hv.vk_token,
@@ -46,3 +44,10 @@ async def start_autoposting():
                         await write_post_data(data=one_post, session=session)
             await clear_attachments_path()
         await asyncio.sleep(100)
+
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(start_autoposting())
+    except KeyboardInterrupt:
+        print('Script stopped')
