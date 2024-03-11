@@ -63,8 +63,22 @@ class Post:
             return "[initialization pending]"
         return "[initialization done and successful]"
 
+    async def replacer(self) -> str:
+        pattern_dict = {
+            'Газета #РепортерВосточногоКрыма': 'Наш телеграм канал',
+            'газете #РепортерВосточногоКрыма': 'нашему телеграм каналу',
+            'а газета #РепортерВосточногоКрыма': ' наш телеграм канал',
+            'газета #РепортерВосточногоКрыма': 'наш телеграм канал',
+            '>': ' ',
+            '<': ' ',
+        }
+        pattern = re.compile("|".join(re.escape(key) for key in pattern_dict))
+        replaced = pattern.sub(lambda match: pattern_dict[match.group(0)], self.text)
+        await asyncio.sleep(0.1)
+        return replaced
+
     async def caption_preparation(self) -> str | None:
-        caption = self.text.replace('>', ' ').replace('<', ' ')
+        caption = await self.replacer()
         if self.repost:
             repost_place = 'public' if self.repost_place_id < 0 else 'id'
             repost = f"<b> → → → → Р Е П О С Т ↓ ↓ ↓ ↓</b>\n" \
