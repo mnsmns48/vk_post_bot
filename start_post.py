@@ -44,7 +44,7 @@ async def start_autoposting():
                     try:
                         await one_post.send_to_telegram()
                     except TelegramBadRequest:
-                        continue
+                        pass
                     async with engine.scoped_session() as session:
                         await write_post_data(data=one_post, session=session)
             await clear_attachments_path()
