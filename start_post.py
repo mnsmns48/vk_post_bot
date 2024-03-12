@@ -2,6 +2,8 @@ import asyncio
 from typing import List
 
 import aiohttp
+from aiogram.exceptions import TelegramBadRequest
+
 from autoposting.cls import Post, clear_attachments_path
 from autoposting.crud import write_post_data, read_post_data
 from autoposting.db_models import Base
@@ -39,7 +41,10 @@ async def start_autoposting():
                 if check:
                     logger.debug(f"{separate.get('id')} {separate.get('owner_id')} {separate.get('text')[:20]}")
                     one_post = await Post(separate)
-                    await one_post.send_to_telegram()
+                    try:
+                        await one_post.send_to_telegram()
+                    except TelegramBadRequest:
+                        continue
                     async with engine.scoped_session() as session:
                         await write_post_data(data=one_post, session=session)
             await clear_attachments_path()

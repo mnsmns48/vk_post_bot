@@ -12,7 +12,7 @@ import requests
 import tzlocal
 from aiogram.types import FSInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
-from yt_dlp import YoutubeDL
+from yt_dlp import YoutubeDL, DownloadError
 
 from autoposting.crud import check_phone_number
 from bot.bot_vars import bot
@@ -193,16 +193,17 @@ async def get_attachments(data: dict, repost: bool) -> dict | None:
                             'ffmpeg-location': '/usr/bin/ffmpeg',
                             'format': '[height<=480]',
                             }
-                with YoutubeDL(ydl_opts) as ydl:
-                    result = ydl.extract_info(video)
-                    if result:
-                        title = ydl.prepare_filename(result)
-                        # if '.unknown_video' in title:
-                        #     os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
-                        out_list.append(
-                            title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
-                    else:
-                        logger.debug('Error loading video')
+                try:
+                    with YoutubeDL(ydl_opts) as ydl:
+                        result = ydl.extract_info(video)
+                        if result:
+                            title = ydl.prepare_filename(result)
+                            # if '.unknown_video' in title:
+                            #     os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
+                            out_list.append(
+                                title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
+                except DownloadError:
+                    logger.debug('Error loading video')
                 await asyncio.sleep(3)
 
         """ Checking PHOTOS in attachments and downloading """
