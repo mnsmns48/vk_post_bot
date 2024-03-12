@@ -29,10 +29,9 @@ async def start(m: Message):
     async with engine.scoped_session() as session:
         await write_user(m, session)
     await m.answer_photo(photo='AgACAgIAAxkBAAITZmQlo77a9vGGy1DlE30EBC652E9-AAIyxjEbbWMpSZgCRTKnxt4VAQADAgADeQADLwQ',
-                         caption='Этот бот принимает посты в телеграм канал @leninocremia\n'
-                                 'А так же показывает цены',
+                         caption='Этот бот принимает посты в телеграм канал @leninocremia',
                          reply_markup=main_kb.as_markup())
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(1)
     await m.answer_photo(photo='AgACAgIAAxkBAAIkbmXl7qS83ahNFL8TN9aTJvhfdiwkAAJo1TEbTEcwS3lDW3Qfwu-7AQADAgADbQADNAQ',
                          caption='↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓',
                          reply_markup=dobrotsen_kb.as_markup())
