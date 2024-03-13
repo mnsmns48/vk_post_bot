@@ -42,7 +42,10 @@ class Post:
                                                 phone_number=self.signer_phone_number)
         self.signer_name = await get_name_by_id(_id=self.signer_id)
         self.repost_place_name = await get_name_by_id(_id=self.repost_place_id) if self.repost else None
-        self.attachments = await get_attachments(self.data, repost=self.repost)
+        try:
+            self.attachments = await get_attachments(self.data, repost=self.repost)
+        except TypeError:
+            self.attachments = None
 
     async def __initobj(self):
         assert not self.async_initialized
