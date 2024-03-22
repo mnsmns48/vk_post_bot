@@ -70,6 +70,7 @@ class Post:
         pattern_dict = {
             'Газета #РепортерВосточногоКрыма': 'Наш телеграм канал',
             'газете #РепортерВосточногоКрыма': 'нашему телеграм каналу',
+            'газете РепортерВосточногоКрыма': 'нашему телеграм каналу',
             'а газета #РепортерВосточногоКрыма': ' наш телеграм канал',
             'газета #РепортерВосточногоКрыма': 'наш телеграм канал',
             '>': ' ',
@@ -201,8 +202,6 @@ async def get_attachments(data: dict, repost: bool) -> dict | None:
                         result = ydl.extract_info(video)
                         if result:
                             title = ydl.prepare_filename(result)
-                            # if '.unknown_video' in title:
-                            #     os.rename(f"{hv.attach_catalog}{name}.unknown_video", f"{hv.attach_catalog}{name}.mp4")
                             out_list.append(
                                 title.replace(hv.attach_catalog, '').replace('.unknown_video', '.mp4').split('\\')[-1])
                 except DownloadError:
