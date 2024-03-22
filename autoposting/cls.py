@@ -14,8 +14,8 @@ from aiogram.types import FSInputFile
 from aiogram.utils.media_group import MediaGroupBuilder
 from yt_dlp import YoutubeDL, DownloadError
 
+from autoposting.bot import bot
 from autoposting.crud import check_phone_number
-from bot.bot_vars import bot
 from cfg_and_engine import hv, engine
 from logger_cfg import logger
 
