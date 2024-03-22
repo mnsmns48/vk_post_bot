@@ -24,7 +24,6 @@ class Hidden:
     attach_catalog: str
     request_url_blank: str
     filter_words: list[str]
-    dobrotsen_db_name: str
 
 
 def load_hidden_vars(path: str):
@@ -48,7 +47,6 @@ def load_hidden_vars(path: str):
         attach_catalog=env.str("ATTACH_CATALOG"),
         request_url_blank=env.str("REQUEST_URL_BLANK") + env.str("BOT_TOKEN"),
         filter_words=list(env.str("FILTER_WORDS").split(',')),
-        dobrotsen_db_name=env.str("DOBROTSEN_DB_NAME")
     )
 
 
@@ -66,7 +64,6 @@ class CoreConfig():
 
 
 dbconfig = CoreConfig(db=hv.main_db_name)
-dobrotsen_config = CoreConfig(db=hv.dobrotsen_db_name)
 
 
 class AsyncDataBase:
@@ -97,4 +94,3 @@ class AsyncDataBase:
 
 
 engine = AsyncDataBase(dbconfig.base, dbconfig.db_echo)
-dobro_engine = AsyncDataBase(dobrotsen_config.base, dobrotsen_config.db_echo)
