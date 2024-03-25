@@ -2,7 +2,7 @@ import asyncio
 from typing import List
 
 import aiohttp
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramEntityTooLarge
 
 from autoposting.cls import Post, clear_attachments_path
 from autoposting.crud import write_post_data, read_post_data
@@ -43,7 +43,7 @@ async def start_autoposting():
                     one_post = await Post(separate)
                     try:
                         await one_post.send_to_telegram()
-                    except TelegramBadRequest:
+                    except (TelegramBadRequest, TelegramEntityTooLarge):
                         pass
                     async with engine.scoped_session() as session:
                         await write_post_data(data=one_post, session=session)
