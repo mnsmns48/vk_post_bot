@@ -43,8 +43,8 @@ async def start_autoposting():
                     one_post = await Post(separate)
                     try:
                         await one_post.send_to_telegram()
-                    except (TelegramBadRequest, TelegramEntityTooLarge):
-                        pass
+                    except (TelegramBadRequest, TelegramEntityTooLarge) as error:
+                        logger.debug(error)
                     async with engine.scoped_session() as session:
                         await write_post_data(data=one_post, session=session)
             await clear_attachments_path()

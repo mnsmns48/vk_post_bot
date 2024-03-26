@@ -56,7 +56,9 @@ def post_filter(func: Callable) -> Callable:
 
 
 @post_filter
-async def read_post_data(post_id: int, group_id: int, text: str) -> bool:
+async def read_post_data(post_id: int, group_id: int, txt: str) -> bool:
+    if text == "":
+        return True
     async with engine.scoped_session() as session:
         query = select(Posts.post_id, Posts.group_id) \
             .filter(Posts.post_id == post_id, Posts.group_id == group_id)
@@ -64,7 +66,7 @@ async def read_post_data(post_id: int, group_id: int, text: str) -> bool:
     if response.fetchone() == (post_id, group_id):
         return False
     async with engine.scoped_session() as session:
-        query = select(Posts.text).filter(Posts.text == text)
+        query = select(Posts.text).filter(Posts.text == txt)
         response_text = await session.execute(query)
     if response_text.fetchone():
         return False
