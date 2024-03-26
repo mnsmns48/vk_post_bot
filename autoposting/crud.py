@@ -57,7 +57,7 @@ def post_filter(func: Callable) -> Callable:
 
 @post_filter
 async def read_post_data(post_id: int, group_id: int, txt: str) -> bool:
-    if text == "":
+    if txt == "":
         return True
     async with engine.scoped_session() as session:
         query = select(Posts.post_id, Posts.group_id) \
