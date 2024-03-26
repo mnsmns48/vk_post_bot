@@ -48,7 +48,7 @@ def post_filter(func: Callable) -> Callable:
     async def wrapper(*args, **kwargs):
         response = await func(*args, **kwargs)
         for filter_one_word in hv.filter_words:
-            if filter_one_word in kwargs.get('text'):
+            if filter_one_word in kwargs.get('txt'):
                 response = False
         return response
 
