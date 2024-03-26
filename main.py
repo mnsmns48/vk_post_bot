@@ -37,7 +37,7 @@ async def start_autoposting():
             for separate in volume_posts:
                 check = await read_post_data(post_id=separate.get('id'),
                                              group_id=separate.get('owner_id'),
-                                             text=separate.get('text'))
+                                             txt=separate.get('text'))
                 if check:
                     logger.debug(f"{separate.get('id')} {separate.get('owner_id')} {separate.get('text')[:20]}")
                     one_post = await Post(separate)
