@@ -175,7 +175,7 @@ def docs_attachment_parsing(data: dict) -> dict[str, Any]:
 
 async def get_attachments(data: dict, repost: bool) -> dict | None:
     if repost:
-        data.update(attachments=data['copy_history'][0]['attachments'])
+        data.update(attachments=data['copy_history'][0].get('attachments'))
     attachments = data.get('attachments')
 
     """ Checking attachments in post """
@@ -194,6 +194,7 @@ async def get_attachments(data: dict, repost: bool) -> dict | None:
             for video in videos:
                 name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.mp4',
+                            'cookiesfrombrowser': ('chrome', None, None, None),
                             'ffmpeg-location': '/usr/bin/ffmpeg',
                             'ignore-errors': True,
                             'format': '[height<=480]',
