@@ -194,7 +194,7 @@ async def get_attachments(data: dict, repost: bool) -> dict | None:
             for video in videos:
                 name = random.randint(1, 100)
                 ydl_opts = {'outtmpl': f'{hv.attach_catalog}{name}.mp4',
-                            'cookiesfrombrowser': ('chrome', None, None, None),
+                            # 'cookiesfrombrowser': ('chrome', None, None, None),
                             'ffmpeg-location': '/usr/bin/ffmpeg',
                             'ignore-errors': True,
                             'format': '[height<=480]',

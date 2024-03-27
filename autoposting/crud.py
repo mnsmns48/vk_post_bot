@@ -65,9 +65,9 @@ async def read_post_data(post_id: int, group_id: int, txt: str) -> bool:
         return False
     if txt == "":
         return True
-    async with engine.scoped_session() as session:
-        query = select(Posts.text).filter(Posts.text == txt)
-        response_text = await session.execute(query)
-    if response_text.fetchone():
-        return False
+    # async with engine.scoped_session() as session:
+    #     query = select(Posts.text).filter(Posts.text == txt)
+    #     response_text = await session.execute(query)
+    # if response_text.fetchone():
+    #     return False
     return True
